@@ -1,8 +1,6 @@
 .env
-node_modules/
 conversations/
 memory/
 escalations/
-data/
 *.log
 header_raw.png

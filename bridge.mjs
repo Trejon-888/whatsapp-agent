@@ -4,7 +4,7 @@
  * WhatsApp Agent Bridge (Claude Code CLI Mode)
  *
  * Receives Zernio webhooks, calls claude -p for AI responses, replies on WhatsApp.
- * Zero API cost -- uses Claude Code's OAuth connection.
+ * Uses Claude Code's OAuth connection. No API key needed.
  *
  * Usage:
  *   1. Copy .env.example to .env and fill in your Zernio keys
@@ -32,105 +32,16 @@ const ZERNIO_KEY = process.env.ZERNIO_API_KEY;
 const WA_ACCOUNT_ID = process.env.ZERNIO_WA_ACCOUNT_ID;
 const WORKSPACE = process.cwd();
 
-if (!ZERNIO_KEY) { console.error("\x1b[31mMissing ZERNIO_API_KEY in .env\x1b[0m"); process.exit(1); }
-if (!WA_ACCOUNT_ID) { console.error("\x1b[31mMissing ZERNIO_WA_ACCOUNT_ID in .env\x1b[0m"); process.exit(1); }
+if (!ZERNIO_KEY) { console.error("Missing ZERNIO_API_KEY in .env"); process.exit(1); }
+if (!WA_ACCOUNT_ID) { console.error("Missing ZERNIO_WA_ACCOUNT_ID in .env"); process.exit(1); }
 
 for (const d of ["conversations", "memory", "escalations"]) {
   if (!existsSync(d)) mkdirSync(d, { recursive: true });
 }
 
-// === TERMINAL UI ===
-const C = {
-  reset: "\x1b[0m",
-  bold: "\x1b[1m",
-  dim: "\x1b[2m",
-  orange: "\x1b[38;2;255;118;20m",
-  green: "\x1b[32m",
-  cyan: "\x1b[36m",
-  yellow: "\x1b[33m",
-  red: "\x1b[31m",
-  gray: "\x1b[90m",
-  white: "\x1b[37m",
-  bgOrange: "\x1b[48;2;255;118;20m",
-  bgGreen: "\x1b[42m",
-  bgCyan: "\x1b[46m",
-  bgDark: "\x1b[48;2;23;30;25m",
-};
+function ts() { return new Date().toISOString().substring(0, 19).replace("T", " "); }
+function log(tag, msg) { console.log("[" + ts() + "] " + tag + " " + msg); }
 
-let msgCount = 0;
-let replyCount = 0;
-const startTime = Date.now();
-
-function timestamp() {
-  return new Date().toLocaleTimeString("en-US", { hour12: true, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
-function divider() {
-  return C.gray + "─".repeat(60) + C.reset;
-}
-
-function showBanner() {
-  console.clear();
-  console.log("");
-  console.log(C.orange + C.bold + "  ╔══════════════════════════════════════════════╗" + C.reset);
-  console.log(C.orange + C.bold + "  ║     WhatsApp AI Agent  -  Live Dashboard     ║" + C.reset);
-  console.log(C.orange + C.bold + "  ╚══════════════════════════════════════════════╝" + C.reset);
-  console.log("");
-  console.log(C.gray + "  Mode:    " + C.white + "Claude Code CLI (OAuth, zero cost)" + C.reset);
-  console.log(C.gray + "  Port:    " + C.white + PORT + C.reset);
-  console.log(C.gray + "  Webhook: " + C.white + "POST /webhook" + C.reset);
-  console.log(C.gray + "  Health:  " + C.white + "GET  /health" + C.reset);
-  console.log("");
-  console.log(divider());
-  console.log(C.green + C.bold + "  Listening for WhatsApp messages..." + C.reset);
-  console.log(divider());
-  console.log("");
-}
-
-function showIncoming(phone, name, text) {
-  msgCount++;
-  const t = timestamp();
-  console.log(C.cyan + C.bold + "  INCOMING MESSAGE" + C.reset + C.gray + "  " + t + C.reset);
-  console.log(C.cyan + "  From: " + C.white + C.bold + (name || phone) + C.reset + C.gray + "  " + phone + C.reset);
-  console.log("");
-  // WhatsApp-style bubble
-  console.log(C.bgCyan + C.bold + " " + C.reset + C.cyan + " " + text + C.reset);
-  console.log("");
-  console.log(C.yellow + "  Thinking..." + C.reset);
-}
-
-function showThinking(seconds) {
-  process.stdout.write("\r" + C.yellow + "  Thinking... " + C.dim + "(" + seconds + "s)" + C.reset + "  ");
-}
-
-function showReply(phone, reply, durationSec) {
-  replyCount++;
-  process.stdout.write("\r" + " ".repeat(40) + "\r");
-  console.log(C.orange + C.bold + "  AGENT REPLY" + C.reset + C.gray + "  " + durationSec.toFixed(1) + "s" + C.reset);
-  console.log("");
-  // Agent bubble
-  console.log(C.bgOrange + C.bold + " " + C.reset + C.orange + " " + reply + C.reset);
-  console.log("");
-}
-
-function showSent(phone) {
-  console.log(C.green + "  Delivered to WhatsApp" + C.reset);
-  console.log("");
-  console.log(divider());
-  const uptime = Math.floor((Date.now() - startTime) / 1000);
-  const mins = Math.floor(uptime / 60);
-  const secs = uptime % 60;
-  console.log(C.gray + "  Messages: " + C.white + msgCount + C.gray + "  Replies: " + C.white + replyCount + C.gray + "  Uptime: " + C.white + mins + "m " + secs + "s" + C.reset);
-  console.log(divider());
-  console.log("");
-}
-
-function showError(msg) {
-  console.log(C.red + C.bold + "  ERROR: " + C.reset + C.red + msg + C.reset);
-  console.log("");
-}
-
-// === CORE ===
 const replied = new Set();
 const queue = [];
 let busy = false;
@@ -145,12 +56,12 @@ async function zernio(path, opts = {}) {
 }
 
 function askClaude(phone, text) {
-  const ts = new Date().toISOString().substring(0, 19).replace("T", " ");
+  const now = ts();
   const convFile = resolve(WORKSPACE, "conversations", phone.replace(/\+/g, "") + ".md");
 
   let history = "";
   try { history = readFileSync(convFile, "utf8"); } catch {}
-  const entry = "\n**Customer [" + ts + "]:** " + text + "\n";
+  const entry = "\n**Customer [" + now + "]:** " + text + "\n";
   writeFileSync(convFile, history + entry);
 
   let biz = "";
@@ -164,10 +75,6 @@ function askClaude(phone, text) {
     "IMPORTANT: Output ONLY the reply text, UNLESS you need to escalate.",
     "If the customer asks about something you can't handle (custom pricing, complaints needing resolution, technical support beyond FAQ, or anything you're unsure about):",
     "  Start your response with ESCALATE: on its own line, followed by a brief reason, then a blank line, then your reply to the customer.",
-    "  Example:",
-    "  ESCALATE: Customer wants custom catering pricing for 200 guests",
-    "",
-    "  I'd love to help with that! Let me have our team put together a custom quote for you. Someone will follow up shortly.",
     "",
     "If no escalation is needed, just output the reply. No labels or markdown.",
     "",
@@ -186,7 +93,6 @@ function askClaude(phone, text) {
       cwd: WORKSPACE,
     }).trim();
 
-    // Check for escalation
     let customerReply = reply;
     if (reply.startsWith("ESCALATE:")) {
       const parts = reply.split("\n\n");
@@ -196,21 +102,19 @@ function askClaude(phone, text) {
       const escFile = resolve(WORKSPACE, "escalations", new Date().toISOString().substring(0, 10) + ".md");
       let existing = "";
       try { existing = readFileSync(escFile, "utf8"); } catch {}
-      const escEntry = "\n### " + ts + " — " + phone + "\n- **Reason:** " + reason + "\n- **Context:** " + text + "\n";
-      writeFileSync(escFile, existing + escEntry);
+      writeFileSync(escFile, existing + "\n### " + now + " -- " + phone + "\n- **Reason:** " + reason + "\n- **Context:** " + text + "\n");
+      log("ESC", phone + ": " + reason);
     }
 
-    // Daily memory log
     const memFile = resolve(WORKSPACE, "memory", new Date().toISOString().substring(0, 10) + ".md");
     let memExisting = "";
     try { memExisting = readFileSync(memFile, "utf8"); } catch {}
-    const memEntry = "\n- **" + ts + "** — " + phone + ": Asked: " + text.substring(0, 100) + " → Replied: " + customerReply.substring(0, 100) + (reply.startsWith("ESCALATE:") ? " [ESCALATED]" : "") + "\n";
-    writeFileSync(memFile, memExisting + memEntry);
+    writeFileSync(memFile, memExisting + "\n- **" + now + "** " + phone + ": " + text.substring(0, 80) + " -> " + customerReply.substring(0, 80) + "\n");
 
-    writeFileSync(convFile, readFileSync(convFile, "utf8") + "**Agent [" + ts + "]:** " + customerReply + "\n");
+    writeFileSync(convFile, readFileSync(convFile, "utf8") + "**Agent [" + now + "]:** " + customerReply + "\n");
     return customerReply;
   } catch (err) {
-    showError("Claude: " + (err.message?.substring(0, 100) || "unknown error"));
+    log("ERR", "claude: " + (err.message?.substring(0, 100) || "unknown"));
     return "Hey! Got your message. Let me get back to you shortly.";
   }
 }
@@ -221,30 +125,15 @@ async function drain() {
   while (queue.length > 0) {
     const j = queue.shift();
     try {
-      showIncoming(j.phone, j.name, j.text);
-
-      const start = Date.now();
-      const thinkInterval = setInterval(() => showThinking(((Date.now() - start) / 1000).toFixed(0)), 1000);
-
+      log("IN", j.phone + " (" + (j.name || "unknown") + "): " + j.text);
       const reply = askClaude(j.phone, j.text);
-      clearInterval(thinkInterval);
-
-      const duration = (Date.now() - start) / 1000;
-      showReply(j.phone, reply, duration);
-
+      log("OUT", j.phone + ": " + reply.substring(0, 100));
       const result = await zernio("/inbox/conversations/" + j.convId + "/messages", {
         method: "POST",
         body: JSON.stringify({ accountId: WA_ACCOUNT_ID, message: reply }),
       });
-
-      if (result.success || result.data) {
-        showSent(j.phone);
-      } else {
-        showError("Zernio: " + JSON.stringify(result).substring(0, 100));
-      }
-    } catch (e) {
-      showError(e.message);
-    }
+      log("SENT", result.success ? "ok" : JSON.stringify(result).substring(0, 80));
+    } catch (e) { log("ERR", e.message); }
   }
   busy = false;
 }
@@ -252,7 +141,7 @@ async function drain() {
 http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify({ ok: true, mode: "claude-cli", messages: msgCount, replies: replyCount, queued: queue.length }));
+    return res.end(JSON.stringify({ ok: true, replied: replied.size, queued: queue.length }));
   }
   if (req.method === "POST" && req.url === "/webhook") {
     let body = "";
@@ -274,12 +163,12 @@ http.createServer(async (req, res) => {
         if (msg.id) replied.add(msg.id);
         queue.push({ phone, text, name, convId: conv.id });
         drain();
-      } catch (e) { showError(e.message); }
+      } catch (e) { log("ERR", e.message); }
     });
     return;
   }
   res.writeHead(404);
   res.end("Not found");
 }).listen(PORT, "0.0.0.0", () => {
-  showBanner();
+  log("START", "WhatsApp Agent Bridge on port " + PORT);
 });

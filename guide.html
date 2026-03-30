@@ -104,30 +104,54 @@
   <div class="progress-dot" onclick="goLevel(3)">3</div><div class="progress-line"></div>
   <div class="progress-dot" onclick="goLevel(4)">4</div><div class="progress-line"></div>
   <div class="progress-dot" onclick="goLevel(5)">5</div><div class="progress-line"></div>
-  <div class="progress-dot" onclick="goLevel(6)">6</div><div class="progress-line"></div>
-  <div class="progress-dot" onclick="goLevel(7)">7</div><div class="progress-line"></div>
-  <div class="progress-dot" onclick="goLevel(8)">8</div>
-  <div class="progress-label" id="progressLabel">Level 1 / 8</div>
+  <div class="progress-dot" onclick="goLevel(6)">6</div>
+  <div class="progress-label" id="progressLabel">Level 1 / 6</div>
 </div>
 
-<!-- LEVEL 1: HOW IT WORKS -->
+<!-- LEVEL 1: WHAT WE'RE BUILDING -->
 <div class="level" id="level1">
   <div class="level-header">
     <div class="level-badge">LEVEL 1</div>
+    <div class="level-title">What We're Building</div>
+  </div>
+  <p style="font-size:18px; margin-bottom:20px; font-weight:600;">A WhatsApp number with an AI agent behind it that answers your customers 24/7.</p>
+  <p style="font-size:16px; margin-bottom:24px; color:#444;">Someone texts your business on WhatsApp. Instead of you replying manually, an AI agent reads the message, checks your business details, and responds in seconds. It knows your pricing, your hours, your FAQ. It handles orders, bookings, and basic questions. If something needs a human, it escalates to you.</p>
+
+  <div class="task" style="cursor:default; border-color:var(--orange); box-shadow: 5px 5px 0 var(--orange);">
+    <h3>Why build this?</h3>
+    <p>You can't reply to every message yourself. Hiring someone costs $2,000+/mo. This costs under $120/mo and never sleeps. It's your receptionist, your first responder, your 24/7 front desk.</p>
+  </div>
+
+  <div class="task" style="cursor:default;">
+    <h3>What you need</h3>
+    <p>A Claude Code subscription (Max plan, starts at $100/mo), a Zernio account for WhatsApp ($12/mo), a server to run it on ($4-10/mo), and 30 minutes to set it up.</p>
+    <span class="task-hint">Claude Code requires the Max plan ($100/mo or $200/mo)</span>
+  </div>
+
+  <div class="task" style="cursor:default;">
+    <h3>What powers it</h3>
+    <p><strong>Claude Code's pipe mode</strong> (<code>claude -p</code>). You pipe a question in, get an answer out. One command. The bridge script does this for every incoming WhatsApp message automatically. Your Max plan subscription covers unlimited calls. No per-message API charges.</p>
+  </div>
+
+  <div class="next-btn" onclick="nextLevel(2)">LEVEL 2 &rarr;</div>
+</div>
+
+<!-- LEVEL 2: HOW IT WORKS -->
+<div class="level" id="level2">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 2</div>
     <div class="level-title">How It Works</div>
   </div>
-  <p style="font-size:17px; margin-bottom:24px;">Think of it like a neural network. Input comes in, the agent processes it with context, output goes back. Every message follows this exact cycle:</p>
+  <p style="font-size:17px; margin-bottom:24px;">Every message follows the same cycle. Input comes in, the agent loads context, thinks, and outputs a reply:</p>
 
   <div class="flow">
     <div class="flow-node"><span class="emoji">💬</span><span class="name">Input</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node orange"><span class="emoji">📡</span><span class="name">Receive</span></div>
+    <div class="flow-node orange"><span class="emoji">📖</span><span class="name">Context</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node"><span class="emoji">📖</span><span class="name">Context</span></div>
+    <div class="flow-node"><span class="emoji">🧠</span><span class="name">Think</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node orange"><span class="emoji">🧠</span><span class="name">Think</span></div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node"><span class="emoji">✅</span><span class="name">Output</span></div>
+    <div class="flow-node orange"><span class="emoji">✅</span><span class="name">Output</span></div>
   </div>
 
   <!-- EXAMPLE 1 -->
@@ -136,10 +160,10 @@
   <div style="background:var(--charcoal); border-radius:14px; border:2px solid var(--black); box-shadow:5px 5px 0 var(--black); padding:24px; margin:16px 0; color:#e0e0e0; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.8;">
     <div><span style="color:#7ec699; font-weight:700;">INPUT</span> <span style="color:#666;">Customer texts WhatsApp</span></div>
     <div style="background:rgba(0,188,212,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#4dd0e1;">"Do you guys deliver?"</div>
-    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span> <span style="color:#666;">Bridge loads BUSINESS.md + conversation history</span></div>
+    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span> <span style="color:#666;">Loads BUSINESS.md + conversation history</span></div>
     <div style="background:rgba(255,118,20,0.1); padding:8px 14px; border-radius:8px; margin:8px 0; color:#FF7614; font-size:12px;">Delivery: within 5 miles, $5 fee, minimum $20<br>Hours: Mon-Thu 12-9, Fri-Sat 12-10, Sun 1-8<br>Previous messages: first contact, no history</div>
-    <div style="margin-top:12px;"><span style="color:#7ec699; font-weight:700;">THINK</span> <span style="color:#666;">claude -p processes the prompt</span></div>
-    <div style="color:#666; font-style:italic; margin:8px 0;">Pipe mode: reads business context + question, generates reply</div>
+    <div style="margin-top:12px;"><span style="color:#7ec699; font-weight:700;">THINK</span> <span style="color:#666;">claude -p processes prompt with context</span></div>
+    <div style="color:#666; font-style:italic; margin:8px 0;">Reads business context + question, generates reply</div>
     <div style="margin-top:12px;"><span style="color:#22c55e; font-weight:700;">OUTPUT</span> <span style="color:#666;">Reply sent to WhatsApp</span></div>
     <div style="background:rgba(34,197,94,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#86efac;">"Yes! We deliver within 5 miles of the shop. $5 delivery fee, $20 minimum order. Just send us what you'd like and your address!"</div>
   </div>
@@ -150,9 +174,9 @@
   <div style="background:var(--charcoal); border-radius:14px; border:2px solid var(--black); box-shadow:5px 5px 0 var(--black); padding:24px; margin:16px 0; color:#e0e0e0; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.8;">
     <div><span style="color:#7ec699; font-weight:700;">INPUT</span> <span style="color:#666;">Same customer, 2 minutes later</span></div>
     <div style="background:rgba(0,188,212,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#4dd0e1;">"Cool, can I get 2 scoops of mango and a chocovolcano?"</div>
-    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span> <span style="color:#666;">Bridge loads BUSINESS.md + previous messages</span></div>
+    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span> <span style="color:#666;">Loads BUSINESS.md + previous messages</span></div>
     <div style="background:rgba(255,118,20,0.1); padding:8px 14px; border-radius:8px; margin:8px 0; color:#FF7614; font-size:12px;">Menu: Double scoop $6.50, Chocovolcano sundae $9<br>Mango Sorbet: available (dairy-free)<br>Previous: asked about delivery, told 5 miles/$5/$20 min</div>
-    <div style="margin-top:12px;"><span style="color:#7ec699; font-weight:700;">THINK</span> <span style="color:#666;">claude -p has full conversation context</span></div>
+    <div style="margin-top:12px;"><span style="color:#7ec699; font-weight:700;">THINK</span> <span style="color:#666;">Has full conversation context</span></div>
     <div style="color:#666; font-style:italic; margin:8px 0;">Knows they want delivery. Calculates total. Asks for address.</div>
     <div style="margin-top:12px;"><span style="color:#22c55e; font-weight:700;">OUTPUT</span></div>
     <div style="background:rgba(34,197,94,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#86efac;">"Great choices! That's $6.50 for the double mango scoop + $9 for the Chocovolcano + $5 delivery = $20.50 total. What's your delivery address?"</div>
@@ -166,23 +190,23 @@
     <div style="background:rgba(0,188,212,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#4dd0e1;">"I want to book your ice cream cart for a wedding, 200 guests, June 15. Can you do a custom menu?"</div>
     <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span></div>
     <div style="background:rgba(255,118,20,0.1); padding:8px 14px; border-radius:8px; margin:8px 0; color:#FF7614; font-size:12px;">Catering: starting $250, up to 30 guests, 3 flavors<br>200 guests = way beyond standard package<br>Custom menu = not in FAQ, needs owner</div>
-    <div style="margin-top:12px;"><span style="color:#f59e0b; font-weight:700;">ESCALATE</span> <span style="color:#666;">Agent flags it for the business owner</span></div>
-    <div style="background:rgba(245,158,11,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#fbbf24; font-size:12px;">Reason: Custom catering for 200 guests, beyond standard package<br>Logged to: escalations/2026-03-30.md</div>
+    <div style="margin-top:12px;"><span style="color:#f59e0b; font-weight:700;">ESCALATE</span> <span style="color:#666;">Beyond what the agent can handle</span></div>
+    <div style="background:rgba(245,158,11,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#fbbf24; font-size:12px;">Reason: Custom catering for 200 guests, beyond standard package<br>Logged to: escalations/2026-03-30.md for you to review</div>
     <div style="margin-top:12px;"><span style="color:#22c55e; font-weight:700;">OUTPUT</span> <span style="color:#666;">Customer still gets a warm reply</span></div>
     <div style="background:rgba(34,197,94,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#86efac;">"A wedding with 200 guests sounds amazing! That's a custom job so I want to make sure we get it perfect. Let me have Enrique reach out to you directly to plan the menu. He'll be in touch shortly!"</div>
   </div>
 
   <div class="info" style="margin-top:32px;">
-    <strong>The key insight:</strong> Each message goes through the same cycle. Input arrives, the bridge loads your business context + conversation history, pipes it to Claude, and sends the output. The "training" is just a markdown file. Edit BUSINESS.md and the agent instantly knows new things. No redeployment, no retraining.
+    <strong>The "training" is just a markdown file.</strong> BUSINESS.md is everything the agent knows. Edit it and the next message uses the new info. No redeployment, no retraining, no waiting. Conversations are remembered per customer. Escalations get logged for you.
   </div>
 
-  <div class="next-btn" onclick="nextLevel(2)">LEVEL 2 &rarr;</div>
+  <div class="next-btn" onclick="nextLevel(3)">LEVEL 3 &rarr;</div>
 </div>
 
-<!-- LEVEL 2: GET A NUMBER -->
-<div class="level" id="level2">
+<!-- LEVEL 3: GET A NUMBER -->
+<div class="level" id="level3">
   <div class="level-header">
-    <div class="level-badge">LEVEL 2</div>
+    <div class="level-badge">LEVEL 3</div>
     <div class="level-title">Get a WhatsApp Number</div>
   </div>
   <div class="task" onclick="this.classList.toggle('completed')">
@@ -202,193 +226,95 @@
   </div>
   <div class="task" onclick="this.classList.toggle('completed')">
     <h3>Get your API key</h3>
-    <p>Settings > API Keys > Create. Copy the key (starts with sk_). You'll need this in the next level.</p>
-  </div>
-  <div class="next-btn" onclick="nextLevel(3)">LEVEL 3 &rarr;</div>
-</div>
-
-<!-- LEVEL 3: CLONE + SETUP -->
-<div class="level" id="level3">
-  <div class="level-header">
-    <div class="level-badge">LEVEL 3</div>
-    <div class="level-title">Clone and Launch Claude Code</div>
-  </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Clone the repo and open Claude Code</h3>
-    <p>Three commands. Claude Code reads SETUP.md and walks you through everything from here.</p>
-  </div>
-  <pre><code><span class="g">git clone</span> https://github.com/Trejon-888/whatsapp-agent.git
-<span class="g">cd</span> whatsapp-agent
-<span class="g">claude</span></code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
-  <div class="info">
-    <strong>From this point, Claude Code takes over.</strong> It reads SETUP.md and guides you step by step: paste your API key, describe your business, start the bridge, connect the webhook. All inside the terminal.
+    <p>Settings > API Keys > Create. Copy the key (starts with sk_).</p>
   </div>
   <div class="next-btn" onclick="nextLevel(4)">LEVEL 4 &rarr;</div>
 </div>
 
-<!-- LEVEL 4: THE PROMPT (HOW THE AGENT THINKS) -->
+<!-- LEVEL 4: SET UP THE REPO -->
 <div class="level" id="level4">
   <div class="level-header">
     <div class="level-badge">LEVEL 4</div>
-    <div class="level-title">How the Agent Thinks</div>
+    <div class="level-title">Set Up the Repo</div>
   </div>
-  <p style="font-size:17px; margin-bottom:24px;">Every time a customer texts, the bridge builds a prompt and pipes it to <code>claude -p</code>. Here's what the agent sees:</p>
+  <p style="font-size:17px; margin-bottom:24px;">Clone the repo and open Claude Code. It reads SETUP.md and handles everything: API keys, business details, bridge startup, webhook connection, testing.</p>
 
-  <pre><code><span class="c"># The bridge builds this prompt for every message:</span>
+  <pre><code><span class="g">git clone</span> https://github.com/Trejon-888/whatsapp-agent.git
+<span class="g">cd</span> whatsapp-agent
+<span class="g">claude</span></code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
 
-You are a WhatsApp business receptionist.
-Reply to the customer's latest message.
-Keep under 150 words. Warm, helpful, concise.
-
-=== BUSINESS ===
-<span class="o">(your BUSINESS.md: name, services, pricing, FAQ, brand voice)</span>
-
-=== CONVERSATION ===
-<span class="s">Customer [10:32 AM]: Do you have dairy-free options?</span>
-<span class="s">Agent [10:32 AM]: Yes! We always have at least 2 sorbets...</span>
-<span class="s">Customer [10:33 AM]: Great, can I order for pickup?</span></code></pre>
-
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>BUSINESS.md = the knowledge</h3>
-    <p>Everything the agent knows comes from this file. Services, pricing, hours, FAQ, brand voice. Edit it anytime.</p>
+  <div class="info">
+    <strong>Claude Code takes over from here.</strong> It walks you through every step: paste your Zernio key, describe your business (it writes BUSINESS.md for you), start the bridge, set up the tunnel, connect the webhook, and test it. All inside one terminal session.
   </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>conversations/ = the memory</h3>
-    <p>Each customer gets a markdown file (by phone number). The bridge loads the last 30 lines as context. The agent remembers what was discussed.</p>
+
+  <div class="file-tree">
+    <span class="dir">whatsapp-agent/</span><br>
+    &nbsp;&nbsp;<span class="file">CLAUDE.md</span> <span class="desc">-- agent behavior and rules</span><br>
+    &nbsp;&nbsp;<span class="file">SETUP.md</span> <span class="desc">-- Claude Code follows this step by step</span><br>
+    &nbsp;&nbsp;<span class="o">BUSINESS.md</span> <span class="desc">-- your business knowledge (edit this!)</span><br>
+    &nbsp;&nbsp;<span class="file">bridge.mjs</span> <span class="desc">-- webhook bridge + live dashboard</span><br>
+    &nbsp;&nbsp;<span class="file">whatsapp-agent.service</span> <span class="desc">-- systemd for 24/7 (VPS only)</span><br>
+    &nbsp;&nbsp;<span class="file">.env.example</span> <span class="desc">-- API key template</span><br>
+    &nbsp;&nbsp;<span class="dir">conversations/</span> <span class="desc">-- per-customer chat logs</span><br>
+    &nbsp;&nbsp;<span class="dir">escalations/</span> <span class="desc">-- needs your attention</span><br>
+    &nbsp;&nbsp;<span class="dir">memory/</span> <span class="desc">-- daily activity logs</span>
   </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Escalation = built-in</h3>
-    <p>If the agent can't handle something (custom pricing, complaints, technical issues), it responds with ESCALATE: and the bridge logs it to escalations/ for you to review.</p>
-  </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>To change the agent's personality</h3>
-    <p>Edit the Brand Voice section in BUSINESS.md. "Professional and direct" vs "Warm and playful" -- the agent adapts immediately. No retraining, no redeployment.</p>
-  </div>
+
   <div class="next-btn" onclick="nextLevel(5)">LEVEL 5 &rarr;</div>
 </div>
 
-<!-- LEVEL 5: START THE BRIDGE -->
+<!-- LEVEL 5: RUN 24/7 -->
 <div class="level" id="level5">
   <div class="level-header">
     <div class="level-badge">LEVEL 5</div>
-    <div class="level-title">Start the Bridge</div>
+    <div class="level-title">Run 24/7</div>
   </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Run the bridge</h3>
-    <p>One command. This starts the webhook server + live dashboard.</p>
+  <p style="font-size:17px; margin-bottom:24px;">On a VPS (private server), three commands make the agent run forever. Starts on boot. Restarts if it crashes.</p>
+
+  <div class="info" style="margin-bottom:24px;">
+    <strong>VPS required.</strong> The bridge needs a server that's always on. A $4-10/mo VPS (Hetzner, DigitalOcean, etc.) works perfectly. This won't run 24/7 on your laptop.
   </div>
-  <pre><code><span class="g">node</span> bridge.mjs</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
-  <pre><code><span class="o">  ╔══════════════════════════════════════════════╗
-  ║     WhatsApp AI Agent  -  Live Dashboard     ║
-  ╚══════════════════════════════════════════════╝</span>
 
-  Mode:    Claude Code CLI (OAuth, zero cost)
-  Port:    18800
-
-  <span class="g">Listening for WhatsApp messages...</span></code></pre>
-
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Expose to the internet</h3>
-    <p>Pick one option to make the bridge reachable from Zernio:</p>
-  </div>
-  <pre><code><span class="c"># Option A: Cloudflare Tunnel (easiest, free)</span>
-<span class="g">cloudflared tunnel</span> <span class="o">--url</span> http://localhost:18800
-
-<span class="c"># Option B: Tailscale Funnel</span>
-<span class="g">tailscale funnel</span> <span class="o">--bg</span> 18800</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
-  <div class="next-btn" onclick="nextLevel(6)">LEVEL 6 &rarr;</div>
-</div>
-
-<!-- LEVEL 6: CONNECT WEBHOOK -->
-<div class="level" id="level6">
-  <div class="level-header">
-    <div class="level-badge">LEVEL 6</div>
-    <div class="level-title">Connect the Webhook</div>
-  </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Add webhook in Zernio</h3>
-    <p>Settings > Webhooks > Add Endpoint</p>
-  </div>
-  <table>
-    <tr><th>Field</th><th>Value</th></tr>
-    <tr><td>URL</td><td><code style="background:var(--orange-light);color:var(--orange)">https://your-tunnel-url/webhook</code></td></tr>
-    <tr><td>Event</td><td><code>message.received</code></td></tr>
-  </table>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Test it</h3>
-    <p>Text your WhatsApp number from your phone. Watch the terminal. You'll see the message come in, the agent think, and the reply get delivered.</p>
-  </div>
-  <pre><code><span class="c">  INCOMING MESSAGE  10:32:15 AM</span>
-  From: <span class="o">John</span>  +1234567890
-
-  <span class="s">Do you have dairy-free options?</span>
-
-  <span class="g">AGENT REPLY  3.2s</span>
-
-  <span class="o">Yes! We always have at least 2 sorbets available...</span>
-
-  <span class="g">Delivered to WhatsApp</span></code></pre>
-  <div class="next-btn" onclick="nextLevel(7)">LEVEL 7 &rarr;</div>
-</div>
-
-<!-- LEVEL 7: RUN 24/7 -->
-<div class="level" id="level7">
-  <div class="level-header">
-    <div class="level-badge">LEVEL 7</div>
-    <div class="level-title">Run 24/7 with systemd</div>
-  </div>
-  <p style="font-size:17px; margin-bottom:24px;">On a server (VPS), set up systemd so the bridge auto-starts on boot and restarts if it crashes.</p>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Install the service</h3>
-    <p>The repo includes a systemd unit file. Three commands to go from "running in terminal" to "runs forever."</p>
-  </div>
   <pre><code><span class="g">sudo cp</span> whatsapp-agent.service /etc/systemd/system/
 <span class="g">sudo systemctl</span> daemon-reload
 <span class="g">sudo systemctl</span> enable <span class="o">--now</span> whatsapp-agent</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Manage it</h3>
-    <p>Standard systemd commands:</p>
+
+  <p style="margin-top:20px;">That's it. Check if it's running:</p>
+
+  <pre><code><span class="g">sudo systemctl</span> status whatsapp-agent</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
+
+  <div class="task" onclick="this.classList.toggle('completed')" style="margin-top:24px;">
+    <h3>Update business info anytime</h3>
+    <p>Edit BUSINESS.md. Changes take effect on the next incoming message. No restart needed. To update bridge.mjs code, run <code>sudo systemctl restart whatsapp-agent</code>.</p>
   </div>
-  <table>
-    <tr><th>Command</th><th>What</th></tr>
-    <tr><td><code>systemctl status whatsapp-agent</code></td><td>Is it running?</td></tr>
-    <tr><td><code>systemctl restart whatsapp-agent</code></td><td>Restart it</td></tr>
-    <tr><td><code>journalctl -u whatsapp-agent -f</code></td><td>Watch live logs</td></tr>
-  </table>
-  <div class="info">
-    <strong>BUSINESS.md changes are instant.</strong> Edit the file and the next incoming message uses the new info. Only restart for bridge.mjs code changes.
-  </div>
-  <div class="next-btn" onclick="nextLevel(8)">LEVEL 8 &rarr;</div>
+
+  <div class="next-btn" onclick="nextLevel(6)">LEVEL 6 &rarr;</div>
 </div>
 
-<!-- LEVEL 8: COSTS + DONE -->
-<div class="level" id="level8">
+<!-- LEVEL 6: COSTS + DONE -->
+<div class="level" id="level6">
   <div class="level-header">
     <div class="level-badge">FINAL LEVEL</div>
     <div class="level-title">What This Costs</div>
   </div>
   <table>
     <tr><th>Item</th><th>Cost</th></tr>
+    <tr><td>Claude Code Max 5x</td><td class="price">$100/mo</td></tr>
+    <tr><td>Claude Code Max 20x</td><td class="price">$200/mo</td></tr>
     <tr><td>Zernio WhatsApp number</td><td class="price">$2/mo</td></tr>
     <tr><td>Zernio Inbox</td><td class="price">$10/mo</td></tr>
-    <tr><td>Claude Code (Max plan)</td><td class="price">$15/mo</td></tr>
-    <tr><td>Meta messaging (24h window)</td><td class="price">Free</td></tr>
     <tr><td>Server (VPS)</td><td class="price">$4-10/mo</td></tr>
-    <tr><td><strong>Total</strong></td><td class="price"><strong>~$29-37/mo</strong></td></tr>
+    <tr><td><strong>Total (with Max 5x)</strong></td><td class="price"><strong>~$116-122/mo</strong></td></tr>
   </table>
-  <div class="info"><strong>No per-message AI costs.</strong> Claude Code's $15/mo Max plan gives you unlimited pipe mode calls. The bridge calls <code>claude -p</code> for every message with no extra charge. Compare to hiring a receptionist.</div>
 
-  <h3 style="margin-top:40px; font-size:22px; font-weight:800;">What You Get</h3>
-  <div class="file-tree">
-    <span class="dir">whatsapp-agent/</span><br>
-    &nbsp;&nbsp;<span class="file">CLAUDE.md</span> <span class="desc">-- agent behavior</span><br>
-    &nbsp;&nbsp;<span class="o">BUSINESS.md</span> <span class="desc">-- your knowledge base (edit this!)</span><br>
-    &nbsp;&nbsp;<span class="file">bridge.mjs</span> <span class="desc">-- webhook bridge + live dashboard</span><br>
-    &nbsp;&nbsp;<span class="file">whatsapp-agent.service</span> <span class="desc">-- systemd for 24/7</span><br>
-    &nbsp;&nbsp;<span class="file">.env</span> <span class="desc">-- API keys</span><br>
-    &nbsp;&nbsp;<span class="dir">conversations/</span> <span class="desc">-- per-customer chat logs</span><br>
-    &nbsp;&nbsp;<span class="dir">escalations/</span> <span class="desc">-- needs your attention</span><br>
-    &nbsp;&nbsp;<span class="dir">memory/</span> <span class="desc">-- daily activity logs</span>
+  <div class="info">
+    <strong>Claude Code requires the Max plan.</strong> The $20/mo Pro plan does not include Claude Code. Max 5x ($100/mo) gives you 5x the usage. Max 20x ($200/mo) gives you 20x. Both include unlimited <code>claude -p</code> pipe mode calls. No per-message API charges on top.<br><br>
+    See <a href="https://claude.com/pricing" style="color:var(--orange); font-weight:700;">claude.com/pricing</a> for current plans.
+  </div>
+
+  <div class="task" style="cursor:default; border-color:var(--orange); box-shadow: 5px 5px 0 var(--orange);">
+    <h3>Compare to the alternative</h3>
+    <p>A part-time virtual assistant: $500-2,000/mo. A full-time receptionist: $3,000+/mo. This handles the same first-contact conversations for $116/mo, 24 hours a day, 7 days a week.</p>
   </div>
 
   <div class="next-btn" onclick="complete()">QUEST COMPLETE &rarr;</div>
@@ -398,7 +324,7 @@ Keep under 150 words. Warm, helpful, concise.
   <div class="complete-screen">
     <div class="trophy">🏆</div>
     <h2>Quest Complete</h2>
-    <p style="font-size:18px; color:#555; margin-bottom:32px;">Your WhatsApp AI agent is live. Customers text, the agent responds. 24/7. Under $40/month. No per-message costs.</p>
+    <p style="font-size:18px; color:#555; margin-bottom:32px;">Your WhatsApp AI agent is live. Customers text, the agent responds. 24/7. No per-message costs.</p>
     <div style="margin-top:40px;">
       <a href="https://aigrowthpartner.ai" class="start-btn" style="text-decoration:none; display:inline-block;">aigrowthpartner.ai</a>
     </div>
@@ -414,7 +340,7 @@ function goLevel(n) {
   document.getElementById('level' + n).classList.add('visible');
   currentLevel = n;
   document.querySelectorAll('.progress-dot').forEach((d, i) => { d.classList.remove('active', 'done'); if (i + 1 < n) d.classList.add('done'); if (i + 1 === n) d.classList.add('active'); });
-  document.getElementById('progressLabel').textContent = n <= 8 ? 'Level ' + n + ' / 8' : 'Complete!';
+  document.getElementById('progressLabel').textContent = n <= 6 ? 'Level ' + n + ' / 6' : 'Complete!';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function nextLevel(n) { goLevel(n); }

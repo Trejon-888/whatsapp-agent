@@ -4,7 +4,7 @@
 
 Your own AI receptionist on WhatsApp. Powered by Claude Code. No per-message costs.
 
-Customers text your WhatsApp number. An AI agent reads your business details, answers their questions, books appointments, and escalates what it can't handle. Runs 24/7 for under $40/month.
+Customers text your WhatsApp number. An AI agent reads your business details, answers their questions, books appointments, and escalates what it can't handle. Runs 24/7 for ~$120/month.
 
 ## How It Works
 
@@ -72,13 +72,14 @@ whatsapp-agent/
 
 | Item | Cost |
 |------|------|
+| Claude Code Max 5x | $100/mo |
+| Claude Code Max 20x | $200/mo |
 | Zernio WhatsApp number | $2/mo |
 | Zernio Inbox add-on | $10/mo |
-| Claude Code Max plan | $15/mo |
 | Server (VPS) | $4-10/mo |
-| **Total** | **~$29-37/mo** |
+| **Total (with Max 5x)** | **~$116-122/mo** |
 
-No per-message AI costs. Claude Code's Max plan ($15/mo) gives you unlimited `claude -p` calls. See [Anthropic pricing](https://www.anthropic.com/pricing) for current plans.
+Claude Code requires the Max plan ($100/mo or $200/mo). The $20/mo Pro plan does not include Claude Code. No per-message AI costs on top. See [Anthropic pricing](https://claude.com/pricing) for current plans.
 
 ## Customization
 

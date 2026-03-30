@@ -1,5 +1,7 @@
 # WhatsApp AI Agent
 
+![WhatsApp AI Agent](header.png)
+
 Your own AI receptionist on WhatsApp. Powered by Claude Code. Zero API costs.
 
 Customers text your WhatsApp number. An AI agent reads your business details, answers their questions, books appointments, and escalates what it can't handle. Runs 24/7 for ~$12/month.

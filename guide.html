@@ -124,13 +124,12 @@
 
   <div class="task" style="cursor:default;">
     <h3>What you need</h3>
-    <p>A Claude Code subscription (Max plan, starts at $100/mo), a Zernio account for WhatsApp ($12/mo), a server to run it on ($4-10/mo), and 30 minutes to set it up.</p>
-    <span class="task-hint">Claude Code requires the Max plan ($100/mo or $200/mo)</span>
+    <p>Access to Claude Code, a Zernio account for WhatsApp ($12/mo), a server to run it on ($4-10/mo), and 30 minutes to set it up.</p>
   </div>
 
   <div class="task" style="cursor:default;">
     <h3>What powers it</h3>
-    <p><strong>Claude Code's pipe mode</strong> (<code>claude -p</code>). You pipe a question in, get an answer out. One command. The bridge script does this for every incoming WhatsApp message automatically. Your Max plan subscription covers unlimited calls. No per-message API charges.</p>
+    <p><strong>Claude Code's pipe mode</strong> (<code>claude -p</code>). You pipe a question in, get an answer out. One command. The bridge script does this for every incoming WhatsApp message automatically.</p>
   </div>
 
   <div class="next-btn" onclick="nextLevel(2)">LEVEL 2 &rarr;</div>
@@ -142,17 +141,52 @@
     <div class="level-badge">LEVEL 2</div>
     <div class="level-title">How It Works</div>
   </div>
-  <p style="font-size:17px; margin-bottom:24px;">Every message follows the same cycle. Input comes in, the agent loads context, thinks, and outputs a reply:</p>
+  <p style="font-size:17px; margin-bottom:12px;">Every message flows through a simple pipeline. Like a workflow automation tool, but the "AI Agent" node is Claude Code reading your business docs.</p>
 
-  <div class="flow">
-    <div class="flow-node"><span class="emoji">💬</span><span class="name">Input</span></div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node orange"><span class="emoji">📖</span><span class="name">Context</span></div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node"><span class="emoji">🧠</span><span class="name">Think</span></div>
-    <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node orange"><span class="emoji">✅</span><span class="name">Output</span></div>
+  <!-- N8N-STYLE WORKFLOW DIAGRAM -->
+  <div style="background:var(--charcoal); border-radius:16px; border:2px solid var(--black); box-shadow:6px 6px 0 var(--black); padding:32px 24px; margin:24px 0; overflow-x:auto;">
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; min-width:600px;">
+      <!-- TRIGGER NODE -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+        <div style="width:56px; height:56px; border-radius:14px; background:#25D366; border:2px solid #1da851; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 0 16px rgba(37,211,102,0.3);">💬</div>
+        <div style="color:#25D366; font-size:11px; font-weight:700; text-align:center;">WhatsApp<br><span style="color:#666; font-weight:500;">Trigger</span></div>
+      </div>
+      <!-- CONNECTOR -->
+      <div style="width:40px; height:2px; background:linear-gradient(to right, #25D366, #FF7614); margin:0 4px; margin-bottom:20px;"></div>
+      <!-- AGENT NODE (MAIN) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+        <div style="width:64px; height:64px; border-radius:14px; background:var(--orange); border:2px solid #cc5e10; display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 0 20px rgba(255,118,20,0.4);">🧠</div>
+        <div style="color:var(--orange); font-size:12px; font-weight:800; text-align:center;">AI Agent<br><span style="color:#888; font-weight:500; font-size:10px;">claude -p</span></div>
+      </div>
+      <!-- CONNECTOR -->
+      <div style="width:40px; height:2px; background:linear-gradient(to right, #FF7614, #22c55e); margin:0 4px; margin-bottom:20px;"></div>
+      <!-- OUTPUT NODE -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+        <div style="width:56px; height:56px; border-radius:14px; background:#22c55e; border:2px solid #16a34a; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 0 16px rgba(34,197,94,0.3);">✅</div>
+        <div style="color:#22c55e; font-size:11px; font-weight:700; text-align:center;">Reply<br><span style="color:#666; font-weight:500;">WhatsApp</span></div>
+      </div>
+    </div>
+    <!-- SUB-NODES CONNECTED TO AGENT -->
+    <div style="display:flex; justify-content:center; margin-top:12px; gap:24px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <div style="width:2px; height:16px; background:#555;"></div>
+        <div style="width:40px; height:40px; border-radius:10px; background:#2a3530; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:18px;">📖</div>
+        <div style="color:#b7c6c2; font-size:10px; font-weight:600; text-align:center;">BUSINESS.md<br><span style="color:#666;">Knowledge</span></div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <div style="width:2px; height:16px; background:#555;"></div>
+        <div style="width:40px; height:40px; border-radius:10px; background:#2a3530; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:18px;">💾</div>
+        <div style="color:#b7c6c2; font-size:10px; font-weight:600; text-align:center;">conversations/<br><span style="color:#666;">Memory</span></div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <div style="width:2px; height:16px; background:#555;"></div>
+        <div style="width:40px; height:40px; border-radius:10px; background:#2a3530; border:2px solid #444; display:flex; align-items:center; justify-content:center; font-size:18px;">🚨</div>
+        <div style="color:#b7c6c2; font-size:10px; font-weight:600; text-align:center;">escalations/<br><span style="color:#666;">Handoff</span></div>
+      </div>
+    </div>
   </div>
+
+  <p style="font-size:15px; color:#555; margin-bottom:32px;">The <strong>WhatsApp Trigger</strong> catches incoming messages. The <strong>AI Agent</strong> (Claude Code in pipe mode) reads your business knowledge and conversation memory, then generates a reply. The <strong>Reply</strong> node sends it back to WhatsApp. If something needs a human, it goes to <strong>Escalations</strong> instead.</p>
 
   <!-- EXAMPLE 1 -->
   <h3 style="margin-top:40px; margin-bottom:16px; font-size:20px; font-weight:800;">Example: Simple Question</h3>
@@ -297,24 +331,21 @@
     <div class="level-badge">FINAL LEVEL</div>
     <div class="level-title">What This Costs</div>
   </div>
+  <div class="info" style="margin-bottom:24px;">
+    <strong>Prerequisite:</strong> You need access to Claude Code. Check your plan at <a href="https://claude.com/pricing" style="color:var(--orange); font-weight:700;">claude.com/pricing</a>.
+  </div>
+
   <table>
     <tr><th>Item</th><th>Cost</th></tr>
-    <tr><td>Claude Code Max 5x</td><td class="price">$100/mo</td></tr>
-    <tr><td>Claude Code Max 20x</td><td class="price">$200/mo</td></tr>
     <tr><td>Zernio WhatsApp number</td><td class="price">$2/mo</td></tr>
-    <tr><td>Zernio Inbox</td><td class="price">$10/mo</td></tr>
+    <tr><td>Zernio Inbox add-on</td><td class="price">$10/mo</td></tr>
     <tr><td>Server (VPS)</td><td class="price">$4-10/mo</td></tr>
-    <tr><td><strong>Total (with Max 5x)</strong></td><td class="price"><strong>~$116-122/mo</strong></td></tr>
+    <tr><td><strong>Total (on top of your Claude Code plan)</strong></td><td class="price"><strong>~$16-22/mo</strong></td></tr>
   </table>
-
-  <div class="info">
-    <strong>Claude Code requires the Max plan.</strong> The $20/mo Pro plan does not include Claude Code. Max 5x ($100/mo) gives you 5x the usage. Max 20x ($200/mo) gives you 20x. Both include unlimited <code>claude -p</code> pipe mode calls. No per-message API charges on top.<br><br>
-    See <a href="https://claude.com/pricing" style="color:var(--orange); font-weight:700;">claude.com/pricing</a> for current plans.
-  </div>
 
   <div class="task" style="cursor:default; border-color:var(--orange); box-shadow: 5px 5px 0 var(--orange);">
     <h3>Compare to the alternative</h3>
-    <p>A part-time virtual assistant: $500-2,000/mo. A full-time receptionist: $3,000+/mo. This handles the same first-contact conversations for $116/mo, 24 hours a day, 7 days a week.</p>
+    <p>A part-time virtual assistant: $500-2,000/mo. A full-time receptionist: $3,000+/mo. This handles the same first-contact conversations for under $25/mo on top of your existing Claude Code plan. 24 hours a day, 7 days a week.</p>
   </div>
 
   <div class="next-btn" onclick="complete()">QUEST COMPLETE &rarr;</div>

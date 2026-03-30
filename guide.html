@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp AI Agent - Setup Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF7614;
+    --orange-light: #fff1e5;
+    --charcoal: #171e19;
+    --sage: #b7c6c2;
+    --white: #ffffff;
+    --black: #000000;
+    --green: #22c55e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; font-weight: 500; color: var(--black); background: #faf9f7; line-height: 1.6; overflow-x: hidden; }
+
+  .hero { background: var(--charcoal); color: var(--white); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 40px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,118,20,0.07) 1px, transparent 1px); background-size: 32px 32px; }
+  .hero .icon-big { font-size: 80px; margin-bottom: 24px; position: relative; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  .hero h1 { font-size: 56px; font-weight: 900; letter-spacing: -3px; line-height: 1; position: relative; max-width: 600px; }
+  .hero h1 span { color: var(--orange); }
+  .hero .subtitle { font-size: 18px; font-weight: 500; margin-top: 20px; opacity: 0.7; position: relative; max-width: 500px; }
+  .start-btn { display: inline-block; background: var(--orange); color: var(--black); padding: 18px 48px; border-radius: 12px; font-size: 18px; font-weight: 800; letter-spacing: 1px; border: 3px solid var(--black); box-shadow: 6px 6px 0 rgba(255,118,20,0.4); margin-top: 40px; cursor: pointer; text-decoration: none; transition: all 0.15s ease; position: relative; }
+  .start-btn:hover { transform: translate(3px, 3px); box-shadow: 3px 3px 0 rgba(255,118,20,0.4); }
+
+  .progress-bar { position: sticky; top: 0; z-index: 100; background: var(--charcoal); padding: 12px 24px; display: flex; align-items: center; gap: 6px; border-bottom: 3px solid var(--black); }
+  .progress-dot { width: 32px; height: 32px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: rgba(255,255,255,0.3); transition: all 0.3s ease; cursor: pointer; flex-shrink: 0; }
+  .progress-dot.active { background: var(--orange); border-color: var(--orange); color: var(--black); box-shadow: 0 0 12px rgba(255,118,20,0.5); }
+  .progress-dot.done { background: var(--green); border-color: var(--green); color: var(--white); }
+  .progress-line { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+  .progress-line .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--orange); transition: width 0.5s ease; width: 0; }
+  .progress-label { color: var(--white); font-size: 12px; font-weight: 700; margin-left: 8px; white-space: nowrap; }
+
+  .level { max-width: 760px; margin: 0 auto; padding: 80px 40px 40px; display: none; }
+  .level.visible { display: block; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  .level-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+  .level-badge { background: var(--orange); color: var(--black); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; letter-spacing: 1px; border: 2px solid var(--black); box-shadow: 3px 3px 0 var(--black); white-space: nowrap; }
+  .level-title { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; }
+
+  .task { background: var(--white); border: 2px solid var(--black); border-radius: 16px; padding: 28px; margin: 20px 0; box-shadow: 5px 5px 0 var(--black); transition: all 0.2s ease; cursor: pointer; position: relative; }
+  .task:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--black); }
+  .task.completed { border-color: var(--green); box-shadow: 5px 5px 0 var(--green); }
+  .task.completed::after { content: ''; position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; background: var(--green); border-radius: 50%; border: 2px solid var(--black); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: 16px; background-repeat: no-repeat; background-position: center; }
+  .task h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; padding-right: 40px; }
+  .task p { font-size: 15px; margin-bottom: 0; color: #444; }
+  .task-hint { display: inline-block; background: var(--orange-light); color: var(--orange); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; margin-top: 10px; }
+
+  pre { background: var(--charcoal); color: #e0e0e0; padding: 20px 24px; border-radius: 12px; border: 2px solid var(--black); box-shadow: 5px 5px 0 var(--black); overflow-x: auto; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 14px; line-height: 1.6; margin: 16px 0; position: relative; }
+  pre .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #aaa; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  pre .copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .g { color: #7ec699; } .o { color: #FF7614; } .s { color: #ce9178; } .c { color: #6a9955; font-style: italic; }
+
+  .flow { display: flex; align-items: center; justify-content: center; gap: 0; margin: 40px 0; flex-wrap: wrap; padding: 20px 0; }
+  .flow-node { background: var(--white); border: 2px solid var(--black); border-radius: 14px; padding: 16px 20px; text-align: center; box-shadow: 4px 4px 0 var(--black); min-width: 100px; transition: all 0.3s ease; }
+  .flow-node:hover { transform: translateY(-4px); box-shadow: 4px 8px 0 var(--black); }
+  .flow-node.orange { background: var(--orange); }
+  .flow-node .emoji { font-size: 28px; display: block; margin-bottom: 6px; }
+  .flow-node .name { font-weight: 800; font-size: 13px; }
+  .flow-arrow { font-size: 24px; padding: 0 6px; color: var(--orange); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  .info { background: var(--orange-light); border-left: 4px solid var(--orange); padding: 16px 20px; margin: 20px 0; border-radius: 0 12px 12px 0; font-size: 15px; }
+  .info strong { color: var(--orange); }
+
+  .next-btn { display: block; width: 100%; background: var(--orange); color: var(--black); padding: 20px; border-radius: 14px; font-size: 18px; font-weight: 800; text-align: center; border: 3px solid var(--black); box-shadow: 6px 6px 0 var(--black); cursor: pointer; margin-top: 40px; transition: all 0.15s ease; }
+  .next-btn:hover { transform: translate(3px, 3px); box-shadow: 3px 3px 0 var(--black); }
+
+  table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 16px 0; border: 2px solid var(--black); border-radius: 14px; overflow: hidden; }
+  th { background: var(--charcoal); color: var(--white); font-weight: 700; text-align: left; padding: 14px 20px; font-size: 14px; }
+  td { padding: 14px 20px; border-bottom: 1px solid #eee; font-size: 15px; }
+  tr:last-child td { border-bottom: none; }
+  .price { font-weight: 800; color: var(--orange); }
+
+  .file-tree { background: var(--charcoal); color: #e0e0e0; padding: 24px 28px; border-radius: 14px; border: 2px solid var(--black); box-shadow: 5px 5px 0 var(--black); font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 2; margin: 20px 0; }
+  .file-tree .dir { color: var(--orange); font-weight: 700; }
+  .file-tree .file { color: #b7c6c2; }
+  .file-tree .desc { color: #666; font-size: 12px; }
+
+  .complete-screen { text-align: center; padding: 80px 40px; max-width: 600px; margin: 0 auto; }
+  .complete-screen .trophy { font-size: 100px; animation: float 3s ease-in-out infinite; }
+  .complete-screen h2 { font-size: 42px; font-weight: 900; letter-spacing: -2px; margin: 24px 0 12px; border: none; padding: 0; }
+
+  @media (max-width: 640px) { .hero h1 { font-size: 36px; } .level { padding: 60px 20px 30px; } .level-title { font-size: 28px; } .flow-node { min-width: 70px; padding: 10px; } .flow-node .emoji { font-size: 20px; } .flow-node .name { font-size: 11px; } .progress-label { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="hero" id="hero">
+  <div class="icon-big">📱</div>
+  <h1>Give Your Agent a <span>WhatsApp</span> Number</h1>
+  <p class="subtitle">8 levels. 30 minutes. Your AI answers customer messages 24/7. Zero API cost.</p>
+  <a class="start-btn" onclick="startQuest()">START QUEST</a>
+</div>
+
+<div class="progress-bar" id="progressBar" style="display:none">
+  <div class="progress-dot active" onclick="goLevel(1)">1</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(2)">2</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(3)">3</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(4)">4</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(5)">5</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(6)">6</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(7)">7</div><div class="progress-line"></div>
+  <div class="progress-dot" onclick="goLevel(8)">8</div>
+  <div class="progress-label" id="progressLabel">Level 1 / 8</div>
+</div>
+
+<!-- LEVEL 1: HOW IT WORKS -->
+<div class="level" id="level1">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 1</div>
+    <div class="level-title">How It Works</div>
+  </div>
+  <p style="font-size:17px; margin-bottom:24px;">Customer texts your WhatsApp. AI replies in seconds. Here's what happens under the hood:</p>
+  <div class="flow">
+    <div class="flow-node"><span class="emoji">💬</span><span class="name">Customer</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node orange"><span class="emoji">📡</span><span class="name">Zernio</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node"><span class="emoji">🔗</span><span class="name">Bridge</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node orange"><span class="emoji">🧠</span><span class="name">claude -p</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node"><span class="emoji">✅</span><span class="name">Reply</span></div>
+  </div>
+
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Zernio = your WhatsApp phone number</h3>
+    <p>Zernio gives you a real WhatsApp Business number for $2/mo. It handles the Meta connection and fires webhooks when messages arrive.</p>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Bridge = a tiny webhook server</h3>
+    <p>One Node.js file (bridge.mjs). It catches the webhook, calls Claude, and sends the reply back. No frameworks, no dependencies.</p>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>claude -p = pipe mode (the brain)</h3>
+    <p>Claude Code's one-shot mode. You pipe text in, get text out. It reads your BUSINESS.md and conversation history, then crafts a reply. Uses your OAuth login. Zero API cost.</p>
+  </div>
+  <pre><code><span class="c"># This is all pipe mode is:</span>
+<span class="g">echo</span> <span class="s">"What are your hours?"</span> | <span class="g">claude -p</span> <span class="o">--output-format</span> text
+<span class="c"># → "We're open Mon-Fri 9-6, Sat 10-2, closed Sunday!"</span></code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>BUSINESS.md = the training</h3>
+    <p>Your agent's entire knowledge comes from one markdown file. Company name, services, pricing, FAQ, brand voice. Edit it anytime. Changes take effect on the next message. No retraining needed.</p>
+  </div>
+  <div class="next-btn" onclick="nextLevel(2)">LEVEL 2 &rarr;</div>
+</div>
+
+<!-- LEVEL 2: GET A NUMBER -->
+<div class="level" id="level2">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 2</div>
+    <div class="level-title">Get a WhatsApp Number</div>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Create a Zernio account</h3>
+    <p>Go to zernio.com and sign up. Then activate the Inbox add-on (free 7-day trial).</p>
+    <span class="task-hint">Required for WhatsApp</span>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Buy a US phone number</h3>
+    <p>Connections > WhatsApp > + Connect > Get a US Number. $2/mo. Zernio auto-verifies with Meta in ~30 seconds.</p>
+    <span class="task-hint">$2/mo</span>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Complete Meta Business Signup</h3>
+    <p>Click "Continue to WhatsApp setup." Create or connect a WhatsApp Business Account. Select your number. Done.</p>
+    <span class="task-hint">~2 minutes</span>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Get your API key</h3>
+    <p>Settings > API Keys > Create. Copy the key (starts with sk_). You'll need this in the next level.</p>
+  </div>
+  <div class="next-btn" onclick="nextLevel(3)">LEVEL 3 &rarr;</div>
+</div>
+
+<!-- LEVEL 3: CLONE + SETUP -->
+<div class="level" id="level3">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 3</div>
+    <div class="level-title">Clone and Launch Claude Code</div>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Clone the repo and open Claude Code</h3>
+    <p>Three commands. Claude Code reads SETUP.md and walks you through everything from here.</p>
+  </div>
+  <pre><code><span class="g">git clone</span> https://github.com/Trejon-888/whatsapp-agent.git
+<span class="g">cd</span> whatsapp-agent
+<span class="g">claude</span></code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
+  <div class="info">
+    <strong>From this point, Claude Code takes over.</strong> It reads SETUP.md and guides you step by step: paste your API key, describe your business, start the bridge, connect the webhook. All inside the terminal.
+  </div>
+  <div class="next-btn" onclick="nextLevel(4)">LEVEL 4 &rarr;</div>
+</div>
+
+<!-- LEVEL 4: THE PROMPT (HOW THE AGENT THINKS) -->
+<div class="level" id="level4">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 4</div>
+    <div class="level-title">How the Agent Thinks</div>
+  </div>
+  <p style="font-size:17px; margin-bottom:24px;">Every time a customer texts, the bridge builds a prompt and pipes it to <code>claude -p</code>. Here's what the agent sees:</p>
+
+  <pre><code><span class="c"># The bridge builds this prompt for every message:</span>
+
+You are a WhatsApp business receptionist.
+Reply to the customer's latest message.
+Keep under 150 words. Warm, helpful, concise.
+
+=== BUSINESS ===
+<span class="o">(your BUSINESS.md: name, services, pricing, FAQ, brand voice)</span>
+
+=== CONVERSATION ===
+<span class="s">Customer [10:32 AM]: Do you have dairy-free options?</span>
+<span class="s">Agent [10:32 AM]: Yes! We always have at least 2 sorbets...</span>
+<span class="s">Customer [10:33 AM]: Great, can I order for pickup?</span></code></pre>
+
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>BUSINESS.md = the knowledge</h3>
+    <p>Everything the agent knows comes from this file. Services, pricing, hours, FAQ, brand voice. Edit it anytime.</p>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>conversations/ = the memory</h3>
+    <p>Each customer gets a markdown file (by phone number). The bridge loads the last 30 lines as context. The agent remembers what was discussed.</p>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Escalation = built-in</h3>
+    <p>If the agent can't handle something (custom pricing, complaints, technical issues), it responds with ESCALATE: and the bridge logs it to escalations/ for you to review.</p>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>To change the agent's personality</h3>
+    <p>Edit the Brand Voice section in BUSINESS.md. "Professional and direct" vs "Warm and playful" -- the agent adapts immediately. No retraining, no redeployment.</p>
+  </div>
+  <div class="next-btn" onclick="nextLevel(5)">LEVEL 5 &rarr;</div>
+</div>
+
+<!-- LEVEL 5: START THE BRIDGE -->
+<div class="level" id="level5">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 5</div>
+    <div class="level-title">Start the Bridge</div>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Run the bridge</h3>
+    <p>One command. This starts the webhook server + live dashboard.</p>
+  </div>
+  <pre><code><span class="g">node</span> bridge.mjs</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
+  <pre><code><span class="o">  ╔══════════════════════════════════════════════╗
+  ║     WhatsApp AI Agent  -  Live Dashboard     ║
+  ╚══════════════════════════════════════════════╝</span>
+
+  Mode:    Claude Code CLI (OAuth, zero cost)
+  Port:    18800
+
+  <span class="g">Listening for WhatsApp messages...</span></code></pre>
+
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Expose to the internet</h3>
+    <p>Pick one option to make the bridge reachable from Zernio:</p>
+  </div>
+  <pre><code><span class="c"># Option A: Cloudflare Tunnel (easiest, free)</span>
+<span class="g">cloudflared tunnel</span> <span class="o">--url</span> http://localhost:18800
+
+<span class="c"># Option B: Tailscale Funnel</span>
+<span class="g">tailscale funnel</span> <span class="o">--bg</span> 18800</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
+  <div class="next-btn" onclick="nextLevel(6)">LEVEL 6 &rarr;</div>
+</div>
+
+<!-- LEVEL 6: CONNECT WEBHOOK -->
+<div class="level" id="level6">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 6</div>
+    <div class="level-title">Connect the Webhook</div>
+  </div>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Add webhook in Zernio</h3>
+    <p>Settings > Webhooks > Add Endpoint</p>
+  </div>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>URL</td><td><code style="background:var(--orange-light);color:var(--orange)">https://your-tunnel-url/webhook</code></td></tr>
+    <tr><td>Event</td><td><code>message.received</code></td></tr>
+  </table>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Test it</h3>
+    <p>Text your WhatsApp number from your phone. Watch the terminal. You'll see the message come in, the agent think, and the reply get delivered.</p>
+  </div>
+  <pre><code><span class="c">  INCOMING MESSAGE  10:32:15 AM</span>
+  From: <span class="o">John</span>  +1234567890
+
+  <span class="s">Do you have dairy-free options?</span>
+
+  <span class="g">AGENT REPLY  3.2s</span>
+
+  <span class="o">Yes! We always have at least 2 sorbets available...</span>
+
+  <span class="g">Delivered to WhatsApp</span></code></pre>
+  <div class="next-btn" onclick="nextLevel(7)">LEVEL 7 &rarr;</div>
+</div>
+
+<!-- LEVEL 7: RUN 24/7 -->
+<div class="level" id="level7">
+  <div class="level-header">
+    <div class="level-badge">LEVEL 7</div>
+    <div class="level-title">Run 24/7 with systemd</div>
+  </div>
+  <p style="font-size:17px; margin-bottom:24px;">On a server (VPS), set up systemd so the bridge auto-starts on boot and restarts if it crashes.</p>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Install the service</h3>
+    <p>The repo includes a systemd unit file. Three commands to go from "running in terminal" to "runs forever."</p>
+  </div>
+  <pre><code><span class="g">sudo cp</span> whatsapp-agent.service /etc/systemd/system/
+<span class="g">sudo systemctl</span> daemon-reload
+<span class="g">sudo systemctl</span> enable <span class="o">--now</span> whatsapp-agent</code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
+  <div class="task" onclick="this.classList.toggle('completed')">
+    <h3>Manage it</h3>
+    <p>Standard systemd commands:</p>
+  </div>
+  <table>
+    <tr><th>Command</th><th>What</th></tr>
+    <tr><td><code>systemctl status whatsapp-agent</code></td><td>Is it running?</td></tr>
+    <tr><td><code>systemctl restart whatsapp-agent</code></td><td>Restart it</td></tr>
+    <tr><td><code>journalctl -u whatsapp-agent -f</code></td><td>Watch live logs</td></tr>
+  </table>
+  <div class="info">
+    <strong>BUSINESS.md changes are instant.</strong> Edit the file and the next incoming message uses the new info. Only restart for bridge.mjs code changes.
+  </div>
+  <div class="next-btn" onclick="nextLevel(8)">LEVEL 8 &rarr;</div>
+</div>
+
+<!-- LEVEL 8: COSTS + DONE -->
+<div class="level" id="level8">
+  <div class="level-header">
+    <div class="level-badge">FINAL LEVEL</div>
+    <div class="level-title">What This Costs</div>
+  </div>
+  <table>
+    <tr><th>Item</th><th>Cost</th></tr>
+    <tr><td>Zernio WhatsApp number</td><td class="price">$2/mo</td></tr>
+    <tr><td>Zernio Inbox</td><td class="price">$10/mo</td></tr>
+    <tr><td>AI (Claude Code OAuth)</td><td class="price">Free</td></tr>
+    <tr><td>Meta messaging (24h window)</td><td class="price">Free</td></tr>
+    <tr><td>Server (VPS)</td><td class="price">$4-10/mo</td></tr>
+    <tr><td><strong>Total</strong></td><td class="price"><strong>~$12-22/mo</strong></td></tr>
+  </table>
+  <div class="info"><strong>No per-message AI costs.</strong> Claude Code uses your OAuth login. The bridge calls <code>claude -p</code> for every message at zero cost. Compare to hiring a receptionist.</div>
+
+  <h3 style="margin-top:40px; font-size:22px; font-weight:800;">What You Get</h3>
+  <div class="file-tree">
+    <span class="dir">whatsapp-agent/</span><br>
+    &nbsp;&nbsp;<span class="file">CLAUDE.md</span> <span class="desc">-- agent behavior</span><br>
+    &nbsp;&nbsp;<span class="o">BUSINESS.md</span> <span class="desc">-- your knowledge base (edit this!)</span><br>
+    &nbsp;&nbsp;<span class="file">bridge.mjs</span> <span class="desc">-- webhook bridge + live dashboard</span><br>
+    &nbsp;&nbsp;<span class="file">whatsapp-agent.service</span> <span class="desc">-- systemd for 24/7</span><br>
+    &nbsp;&nbsp;<span class="file">.env</span> <span class="desc">-- API keys</span><br>
+    &nbsp;&nbsp;<span class="dir">conversations/</span> <span class="desc">-- per-customer chat logs</span><br>
+    &nbsp;&nbsp;<span class="dir">escalations/</span> <span class="desc">-- needs your attention</span><br>
+    &nbsp;&nbsp;<span class="dir">memory/</span> <span class="desc">-- daily activity logs</span>
+  </div>
+
+  <div class="next-btn" onclick="complete()">QUEST COMPLETE &rarr;</div>
+</div>
+
+<div class="level" id="complete">
+  <div class="complete-screen">
+    <div class="trophy">🏆</div>
+    <h2>Quest Complete</h2>
+    <p style="font-size:18px; color:#555; margin-bottom:32px;">Your WhatsApp AI agent is live. Customers text, the agent responds. 24/7. Under $25/month. Zero API costs.</p>
+    <div style="margin-top:40px;">
+      <a href="https://aigrowthpartner.ai" class="start-btn" style="text-decoration:none; display:inline-block;">aigrowthpartner.ai</a>
+    </div>
+    <p style="margin-top:20px; font-size:14px; color:#888;">WhatsApp powered by <a href="https://zernio.com?atp=enriquemarq" style="color:var(--orange); text-decoration:none; font-weight:700;">Zernio</a></p>
+  </div>
+</div>
+
+<script>
+let currentLevel = 0;
+function startQuest() { document.getElementById('hero').style.display = 'none'; document.getElementById('progressBar').style.display = 'flex'; goLevel(1); }
+function goLevel(n) {
+  document.querySelectorAll('.level').forEach(l => l.classList.remove('visible'));
+  document.getElementById('level' + n).classList.add('visible');
+  currentLevel = n;
+  document.querySelectorAll('.progress-dot').forEach((d, i) => { d.classList.remove('active', 'done'); if (i + 1 < n) d.classList.add('done'); if (i + 1 === n) d.classList.add('active'); });
+  document.getElementById('progressLabel').textContent = n <= 8 ? 'Level ' + n + ' / 8' : 'Complete!';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function nextLevel(n) { goLevel(n); }
+function complete() {
+  document.querySelectorAll('.level').forEach(l => l.classList.remove('visible'));
+  document.getElementById('complete').classList.add('visible');
+  document.querySelectorAll('.progress-dot').forEach(d => { d.classList.remove('active'); d.classList.add('done'); });
+  document.getElementById('progressLabel').textContent = 'Complete!';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function copyCode(btn) { const code = btn.closest('pre').querySelector('code').innerText; navigator.clipboard.writeText(code).then(() => { btn.textContent = 'copied!'; setTimeout(() => btn.textContent = 'copy', 1500); }); }
+</script>
+</body>
+</html>

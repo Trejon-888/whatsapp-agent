@@ -281,6 +281,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0a0d0b;color:#e0e0e0;h
 .msg.out .mtime{color:rgba(0,0,0,.5)}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#333;gap:12px}
 .empty .eicon{font-size:48px;opacity:.3}
+.editor{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.editor-header{padding:20px 28px;border-bottom:1px solid #1e2620;background:#111613;display:flex;align-items:center;justify-content:space-between}
+.editor-header h2{font-size:16px;font-weight:800;color:#fff}
+.editor-header .desc{font-size:12px;color:#666;margin-top:4px}
+.save-btn{background:#FF7614;color:#000;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.save-btn:hover{background:#e06a10}
+.save-btn.saved{background:#22c55e;color:#fff}
+.editor textarea{flex:1;background:#0a0d0b;color:#e0e0e0;border:none;padding:28px;font-family:'JetBrains Mono','Fira Code',monospace;font-size:14px;line-height:1.7;resize:none;outline:none}
+.editor textarea:focus{background:#0d100e}
+.settings-list{padding:12px}
+.settings-item{padding:16px;border-radius:12px;cursor:pointer;transition:all .15s;margin-bottom:4px;border:1px solid transparent}
+.settings-item:hover{background:#161c18}
+.settings-item.active{background:#1a221d;border-color:#2a3530}
+.settings-item .sname{font-weight:700;font-size:14px;color:#fff}
+.settings-item .sdesc{font-size:12px;color:#666;margin-top:4px}
 @media(max-width:768px){.app{grid-template-columns:1fr}}
 </style>
 </head><body>
@@ -291,8 +306,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0a0d0b;color:#e0e0e0;h
 </div>
 <div class="sidebar">
   <div class="tab-bar">
-    <div class="tab active" id="tab-c" onclick="switchTab('c')">Conversations</div>
+    <div class="tab active" id="tab-c" onclick="switchTab('c')">Chats</div>
     <div class="tab" id="tab-e" onclick="switchTab('e')">Escalations</div>
+    <div class="tab" id="tab-s" onclick="switchTab('s')">Settings</div>
   </div>
   <div class="contacts" id="list"></div>
 </div>
@@ -301,9 +317,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0a0d0b;color:#e0e0e0;h
 </div>
 </div>
 <script>
-let tab='c',activeFile=null;
+let tab='c',activeFile=null,activeSettingsFile=null;
 function h(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
-async function api(p){return(await fetch(p)).json()}
+async function api(p,opts){return(await fetch(p,opts)).json()}
 async function loadStats(){
   const s=await api('/api/stats');
   document.getElementById('stats').innerHTML=[
@@ -311,10 +327,13 @@ async function loadStats(){
   ].map(x=>'<div class="stat"><div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></div>').join('');
 }
 function switchTab(t){
-  tab=t;
+  tab=t;activeFile=null;activeSettingsFile=null;
   document.getElementById('tab-c').classList.toggle('active',t==='c');
   document.getElementById('tab-e').classList.toggle('active',t==='e');
-  t==='c'?loadConvos():loadEscs();
+  document.getElementById('tab-s').classList.toggle('active',t==='s');
+  if(t==='c'){loadConvos();document.getElementById('chat').innerHTML='<div class="empty"><div class="eicon">💬</div><div>Select a conversation</div></div>';}
+  else if(t==='e'){loadEscs();document.getElementById('chat').innerHTML='<div class="empty"><div class="eicon">💬</div><div>Select a conversation</div></div>';}
+  else if(t==='s'){loadSettings();document.getElementById('chat').innerHTML='<div class="empty"><div class="eicon">⚙️</div><div>Select a file to edit</div></div>';}
 }
 async function loadConvos(){
   const cs=await api('/api/conversations');
@@ -328,13 +347,24 @@ async function loadConvos(){
 async function loadEscs(){
   const es=await api('/api/escalations');
   document.getElementById('list').innerHTML=es.length?es.map(e=>
-    '<div class="contact">'+
+    '<div class="contact" onclick="openChat(null)">'+
     '<div class="row"><div class="name">'+h(e.phone)+'</div><div class="time">'+h(e.time)+'</div></div>'+
     '<div class="preview">'+h(e.reason)+'</div>'+
     '<div class="pills"><span class="pill esc">ESCALATED</span><span class="pill">'+h(e.context?.substring(0,40))+'</span></div></div>'
   ).join(''):'<div style="padding:32px;text-align:center;color:#444">No escalations</div>';
 }
+function loadSettings(){
+  const files=[
+    {file:'PERSONALITY.md',name:'Personality',desc:'How the agent responds on WhatsApp'},
+    {file:'BUSINESS.md',name:'Business Details',desc:'Services, pricing, hours, FAQ'}
+  ];
+  document.getElementById('list').innerHTML=files.map(f=>
+    '<div class="settings-item'+(activeSettingsFile===f.file?' active':'')+'" onclick="openEditor(\\''+f.file+'\\')">'+
+    '<div class="sname">'+f.name+'</div><div class="sdesc">'+f.desc+'</div></div>'
+  ).join('');
+}
 async function openChat(file){
+  if(!file)return;
   activeFile=file;
   const data=await api('/api/conversations/'+encodeURIComponent(file));
   const init=(data.name||'?')[0].toUpperCase();
@@ -345,6 +375,26 @@ async function openChat(file){
     ).join('')+'</div>';
   document.getElementById('msgs').scrollTop=99999;
   if(tab==='c')loadConvos();
+}
+async function openEditor(file){
+  activeSettingsFile=file;
+  loadSettings();
+  const data=await api('/api/file/'+encodeURIComponent(file));
+  const names={'PERSONALITY.md':'Agent Personality','BUSINESS.md':'Business Details'};
+  const descs={'PERSONALITY.md':'Controls how the agent responds to WhatsApp messages. Changes take effect on the next incoming message.','BUSINESS.md':'Everything the agent knows about your business. Services, pricing, hours, FAQ, brand voice.'};
+  document.getElementById('chat').innerHTML=
+    '<div class="editor">'+
+    '<div class="editor-header"><div><h2>'+h(names[file]||file)+'</h2><div class="desc">'+h(descs[file]||file)+'</div></div>'+
+    '<button class="save-btn" onclick="saveFile(\\''+file+'\\')">Save</button></div>'+
+    '<textarea id="editor-content">'+h(data.content)+'</textarea></div>';
+}
+async function saveFile(file){
+  const content=document.getElementById('editor-content').value;
+  const btn=document.querySelector('.save-btn');
+  btn.textContent='Saving...';
+  await fetch('/api/file/'+encodeURIComponent(file),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});
+  btn.textContent='Saved!';btn.classList.add('saved');
+  setTimeout(()=>{btn.textContent='Save';btn.classList.remove('saved')},2000);
 }
 loadStats();loadConvos();
 setInterval(()=>{loadStats();if(tab==='c')loadConvos();if(activeFile)openChat(activeFile)},15000);
@@ -393,6 +443,37 @@ http.createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/api/escalations") {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(getEscalationList()));
+  }
+
+  // File read/write (settings editor)
+  const EDITABLE = ["PERSONALITY.md", "BUSINESS.md"];
+  if (req.method === "GET" && url.pathname.startsWith("/api/file/")) {
+    const file = decodeURIComponent(url.pathname.replace("/api/file/", ""));
+    if (!EDITABLE.includes(file)) { res.writeHead(403); return res.end("Not editable"); }
+    let content = "";
+    try { content = readFileSync(resolve(DIR, file), "utf8"); } catch {}
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ file, content }));
+  }
+
+  if (req.method === "POST" && url.pathname.startsWith("/api/file/")) {
+    const file = decodeURIComponent(url.pathname.replace("/api/file/", ""));
+    if (!EDITABLE.includes(file)) { res.writeHead(403); return res.end("Not editable"); }
+    let body = "";
+    req.on("data", c => body += c);
+    req.on("end", () => {
+      try {
+        const data = JSON.parse(body);
+        writeFileSync(resolve(DIR, file), data.content);
+        log("EDIT", file + " updated via dashboard");
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ ok: true }));
+      } catch (e) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
   }
 
   if (req.method === "POST" && url.pathname === "/webhook") {

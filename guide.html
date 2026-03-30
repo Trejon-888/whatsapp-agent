@@ -116,38 +116,66 @@
     <div class="level-badge">LEVEL 1</div>
     <div class="level-title">How It Works</div>
   </div>
-  <p style="font-size:17px; margin-bottom:24px;">Customer texts your WhatsApp. AI replies in seconds. Here's what happens under the hood:</p>
+  <p style="font-size:17px; margin-bottom:24px;">Think of it like a neural network. Input comes in, the agent processes it with context, output goes back. Every message follows this exact cycle:</p>
+
   <div class="flow">
-    <div class="flow-node"><span class="emoji">💬</span><span class="name">Customer</span></div>
+    <div class="flow-node"><span class="emoji">💬</span><span class="name">Input</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node orange"><span class="emoji">📡</span><span class="name">Zernio</span></div>
+    <div class="flow-node orange"><span class="emoji">📡</span><span class="name">Receive</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node"><span class="emoji">🔗</span><span class="name">Bridge</span></div>
+    <div class="flow-node"><span class="emoji">📖</span><span class="name">Context</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node orange"><span class="emoji">🧠</span><span class="name">claude -p</span></div>
+    <div class="flow-node orange"><span class="emoji">🧠</span><span class="name">Think</span></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-node"><span class="emoji">✅</span><span class="name">Reply</span></div>
+    <div class="flow-node"><span class="emoji">✅</span><span class="name">Output</span></div>
   </div>
 
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Zernio = your WhatsApp phone number</h3>
-    <p>Zernio gives you a real WhatsApp Business number for $2/mo. It handles the Meta connection and fires webhooks when messages arrive.</p>
+  <!-- EXAMPLE 1 -->
+  <h3 style="margin-top:40px; margin-bottom:16px; font-size:20px; font-weight:800;">Example: Simple Question</h3>
+
+  <div style="background:var(--charcoal); border-radius:14px; border:2px solid var(--black); box-shadow:5px 5px 0 var(--black); padding:24px; margin:16px 0; color:#e0e0e0; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.8;">
+    <div><span style="color:#7ec699; font-weight:700;">INPUT</span> <span style="color:#666;">Customer texts WhatsApp</span></div>
+    <div style="background:rgba(0,188,212,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#4dd0e1;">"Do you guys deliver?"</div>
+    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span> <span style="color:#666;">Bridge loads BUSINESS.md + conversation history</span></div>
+    <div style="background:rgba(255,118,20,0.1); padding:8px 14px; border-radius:8px; margin:8px 0; color:#FF7614; font-size:12px;">Delivery: within 5 miles, $5 fee, minimum $20<br>Hours: Mon-Thu 12-9, Fri-Sat 12-10, Sun 1-8<br>Previous messages: first contact, no history</div>
+    <div style="margin-top:12px;"><span style="color:#7ec699; font-weight:700;">THINK</span> <span style="color:#666;">claude -p processes the prompt</span></div>
+    <div style="color:#666; font-style:italic; margin:8px 0;">Pipe mode: reads business context + question, generates reply</div>
+    <div style="margin-top:12px;"><span style="color:#22c55e; font-weight:700;">OUTPUT</span> <span style="color:#666;">Reply sent to WhatsApp</span></div>
+    <div style="background:rgba(34,197,94,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#86efac;">"Yes! We deliver within 5 miles of the shop. $5 delivery fee, $20 minimum order. Just send us what you'd like and your address!"</div>
   </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>Bridge = a tiny webhook server</h3>
-    <p>One Node.js file (bridge.mjs). It catches the webhook, calls Claude, and sends the reply back. No frameworks, no dependencies.</p>
+
+  <!-- EXAMPLE 2 -->
+  <h3 style="margin-top:32px; margin-bottom:16px; font-size:20px; font-weight:800;">Example: Follow-up with Memory</h3>
+
+  <div style="background:var(--charcoal); border-radius:14px; border:2px solid var(--black); box-shadow:5px 5px 0 var(--black); padding:24px; margin:16px 0; color:#e0e0e0; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.8;">
+    <div><span style="color:#7ec699; font-weight:700;">INPUT</span> <span style="color:#666;">Same customer, 2 minutes later</span></div>
+    <div style="background:rgba(0,188,212,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#4dd0e1;">"Cool, can I get 2 scoops of mango and a chocovolcano?"</div>
+    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span> <span style="color:#666;">Bridge loads BUSINESS.md + previous messages</span></div>
+    <div style="background:rgba(255,118,20,0.1); padding:8px 14px; border-radius:8px; margin:8px 0; color:#FF7614; font-size:12px;">Menu: Double scoop $6.50, Chocovolcano sundae $9<br>Mango Sorbet: available (dairy-free)<br>Previous: asked about delivery, told 5 miles/$5/$20 min</div>
+    <div style="margin-top:12px;"><span style="color:#7ec699; font-weight:700;">THINK</span> <span style="color:#666;">claude -p has full conversation context</span></div>
+    <div style="color:#666; font-style:italic; margin:8px 0;">Knows they want delivery. Calculates total. Asks for address.</div>
+    <div style="margin-top:12px;"><span style="color:#22c55e; font-weight:700;">OUTPUT</span></div>
+    <div style="background:rgba(34,197,94,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#86efac;">"Great choices! That's $6.50 for the double mango scoop + $9 for the Chocovolcano + $5 delivery = $20.50 total. What's your delivery address?"</div>
   </div>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>claude -p = pipe mode (the brain)</h3>
-    <p>Claude Code's one-shot mode. You pipe text in, get text out. It reads your BUSINESS.md and conversation history, then crafts a reply. Uses your OAuth login. Zero API cost.</p>
+
+  <!-- EXAMPLE 3 -->
+  <h3 style="margin-top:32px; margin-bottom:16px; font-size:20px; font-weight:800;">Example: Escalation</h3>
+
+  <div style="background:var(--charcoal); border-radius:14px; border:2px solid var(--black); box-shadow:5px 5px 0 var(--black); padding:24px; margin:16px 0; color:#e0e0e0; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.8;">
+    <div><span style="color:#7ec699; font-weight:700;">INPUT</span></div>
+    <div style="background:rgba(0,188,212,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#4dd0e1;">"I want to book your ice cream cart for a wedding, 200 guests, June 15. Can you do a custom menu?"</div>
+    <div style="margin-top:12px;"><span style="color:#FF7614; font-weight:700;">CONTEXT</span></div>
+    <div style="background:rgba(255,118,20,0.1); padding:8px 14px; border-radius:8px; margin:8px 0; color:#FF7614; font-size:12px;">Catering: starting $250, up to 30 guests, 3 flavors<br>200 guests = way beyond standard package<br>Custom menu = not in FAQ, needs owner</div>
+    <div style="margin-top:12px;"><span style="color:#f59e0b; font-weight:700;">ESCALATE</span> <span style="color:#666;">Agent flags it for the business owner</span></div>
+    <div style="background:rgba(245,158,11,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#fbbf24; font-size:12px;">Reason: Custom catering for 200 guests, beyond standard package<br>Logged to: escalations/2026-03-30.md</div>
+    <div style="margin-top:12px;"><span style="color:#22c55e; font-weight:700;">OUTPUT</span> <span style="color:#666;">Customer still gets a warm reply</span></div>
+    <div style="background:rgba(34,197,94,0.15); padding:8px 14px; border-radius:8px; margin:8px 0; color:#86efac;">"A wedding with 200 guests sounds amazing! That's a custom job so I want to make sure we get it perfect. Let me have Enrique reach out to you directly to plan the menu. He'll be in touch shortly!"</div>
   </div>
-  <pre><code><span class="c"># This is all pipe mode is:</span>
-<span class="g">echo</span> <span class="s">"What are your hours?"</span> | <span class="g">claude -p</span> <span class="o">--output-format</span> text
-<span class="c"># → "We're open Mon-Fri 9-6, Sat 10-2, closed Sunday!"</span></code><span class="copy-btn" onclick="copyCode(this)">copy</span></pre>
-  <div class="task" onclick="this.classList.toggle('completed')">
-    <h3>BUSINESS.md = the training</h3>
-    <p>Your agent's entire knowledge comes from one markdown file. Company name, services, pricing, FAQ, brand voice. Edit it anytime. Changes take effect on the next message. No retraining needed.</p>
+
+  <div class="info" style="margin-top:32px;">
+    <strong>The key insight:</strong> Each message goes through the same cycle. Input arrives, the bridge loads your business context + conversation history, pipes it to Claude, and sends the output. The "training" is just a markdown file. Edit BUSINESS.md and the agent instantly knows new things. No redeployment, no retraining.
   </div>
+
   <div class="next-btn" onclick="nextLevel(2)">LEVEL 2 &rarr;</div>
 </div>
 

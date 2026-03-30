@@ -1,0 +1,16 @@
+[Unit]
+Description=WhatsApp AI Agent Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=openclaw
+WorkingDirectory=/home/openclaw/whatsapp-agent
+ExecStart=/usr/bin/node /home/openclaw/whatsapp-agent/bridge.mjs
+Restart=always
+RestartSec=5
+Environment=PATH=/home/openclaw/.npm-global/bin:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=/home/openclaw
+
+[Install]
+WantedBy=multi-user.target

@@ -159,7 +159,17 @@ function askClaude(phone, text) {
   const prompt = [
     "You are a WhatsApp business receptionist. Reply to the customer's latest message.",
     "Use the business details and conversation history below.",
-    "Keep under 150 words. Warm, helpful, concise. Output ONLY the reply. No labels or markdown.",
+    "Keep under 150 words. Warm, helpful, concise.",
+    "",
+    "IMPORTANT: Output ONLY the reply text, UNLESS you need to escalate.",
+    "If the customer asks about something you can't handle (custom pricing, complaints needing resolution, technical support beyond FAQ, or anything you're unsure about):",
+    "  Start your response with ESCALATE: on its own line, followed by a brief reason, then a blank line, then your reply to the customer.",
+    "  Example:",
+    "  ESCALATE: Customer wants custom catering pricing for 200 guests",
+    "",
+    "  I'd love to help with that! Let me have our team put together a custom quote for you. Someone will follow up shortly.",
+    "",
+    "If no escalation is needed, just output the reply. No labels or markdown.",
     "",
     "=== BUSINESS ===",
     biz.substring(0, 3000),
@@ -176,8 +186,29 @@ function askClaude(phone, text) {
       cwd: WORKSPACE,
     }).trim();
 
-    writeFileSync(convFile, readFileSync(convFile, "utf8") + "**Agent [" + ts + "]:** " + reply + "\n");
-    return reply;
+    // Check for escalation
+    let customerReply = reply;
+    if (reply.startsWith("ESCALATE:")) {
+      const parts = reply.split("\n\n");
+      const reason = parts[0].replace("ESCALATE:", "").trim();
+      customerReply = parts.slice(1).join("\n\n").trim() || "Thanks for reaching out! Someone from our team will follow up with you shortly.";
+
+      const escFile = resolve(WORKSPACE, "escalations", new Date().toISOString().substring(0, 10) + ".md");
+      let existing = "";
+      try { existing = readFileSync(escFile, "utf8"); } catch {}
+      const escEntry = "\n### " + ts + " — " + phone + "\n- **Reason:** " + reason + "\n- **Context:** " + text + "\n";
+      writeFileSync(escFile, existing + escEntry);
+    }
+
+    // Daily memory log
+    const memFile = resolve(WORKSPACE, "memory", new Date().toISOString().substring(0, 10) + ".md");
+    let memExisting = "";
+    try { memExisting = readFileSync(memFile, "utf8"); } catch {}
+    const memEntry = "\n- **" + ts + "** — " + phone + ": Asked: " + text.substring(0, 100) + " → Replied: " + customerReply.substring(0, 100) + (reply.startsWith("ESCALATE:") ? " [ESCALATED]" : "") + "\n";
+    writeFileSync(memFile, memExisting + memEntry);
+
+    writeFileSync(convFile, readFileSync(convFile, "utf8") + "**Agent [" + ts + "]:** " + customerReply + "\n");
+    return customerReply;
   } catch (err) {
     showError("Claude: " + (err.message?.substring(0, 100) || "unknown error"));
     return "Hey! Got your message. Let me get back to you shortly.";

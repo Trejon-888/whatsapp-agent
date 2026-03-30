@@ -61,11 +61,11 @@ function askClaude(phone, name, text) {
   // Record incoming message
   recordIncoming(phone, name, text);
 
-  // Load agent behavior rules
+  // Load agent personality (not CLAUDE.md -- that's for the interactive session)
   let behavior = "";
-  const claudePath = resolve(WORKSPACE, "CLAUDE.md");
-  if (existsSync(claudePath)) {
-    try { behavior = readFileSync(claudePath, "utf8"); } catch {}
+  const personalityPath = resolve(WORKSPACE, "PERSONALITY.md");
+  if (existsSync(personalityPath)) {
+    try { behavior = readFileSync(personalityPath, "utf8"); } catch {}
   }
 
   // Load business knowledge
@@ -147,104 +147,161 @@ function dashboardHTML() {
   return `<!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Agent Dashboard</title>
+<title>WhatsApp Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Inter',system-ui,sans-serif;background:#0f1210;color:#e0e0e0;min-height:100vh}
-  .header{background:#171e19;border-bottom:2px solid #FF7614;padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
-  .header h1{color:#FF7614;font-size:20px;font-weight:800;letter-spacing:-0.5px}
-  .stats{display:flex;gap:24px}
-  .stat{text-align:center}.stat .n{font-size:24px;font-weight:800;color:#fff}.stat .l{font-size:11px;color:#888;text-transform:uppercase}
-  .main{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 70px)}
-  .sidebar{background:#141a16;border-right:1px solid #2a3530;overflow-y:auto}
-  .sidebar .title{padding:16px;font-size:13px;font-weight:700;color:#888;text-transform:uppercase;border-bottom:1px solid #2a3530}
-  .contact{padding:14px 16px;border-bottom:1px solid #1e2620;cursor:pointer;transition:background .15s}
-  .contact:hover,.contact.active{background:#1e2822}
+  body{font-family:'Inter',system-ui,sans-serif;background:#0a0d0b;color:#e0e0e0;height:100vh;overflow:hidden}
+
+  /* LAYOUT */
+  .app{display:grid;grid-template-columns:340px 1fr;grid-template-rows:auto 1fr;height:100vh}
+  .header{grid-column:1/-1;background:#111613;border-bottom:1px solid #1e2620;padding:16px 28px;display:flex;align-items:center;gap:28px}
+  .header h1{color:#FF7614;font-size:18px;font-weight:800;letter-spacing:-0.5px;white-space:nowrap}
+  .header .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:blink 3s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+  .stats{display:flex;gap:20px;margin-left:auto}
+  .stat{background:#161c18;border:1px solid #1e2620;border-radius:10px;padding:8px 16px;text-align:center;min-width:80px}
+  .stat .n{font-size:20px;font-weight:800;color:#fff}
+  .stat .l{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+  /* SIDEBAR */
+  .sidebar{background:#0f1311;border-right:1px solid #1e2620;display:flex;flex-direction:column;overflow:hidden}
+  .tab-bar{display:flex;padding:4px;margin:12px 12px 0;background:#161c18;border-radius:10px}
+  .tab{flex:1;padding:10px;font-size:12px;font-weight:700;color:#666;cursor:pointer;border-radius:8px;text-align:center;transition:all .2s}
+  .tab.active{background:#FF7614;color:#000}
+  .tab:hover:not(.active){color:#aaa}
+  .contacts{flex:1;overflow-y:auto;padding:8px}
+  .contacts::-webkit-scrollbar{width:4px}
+  .contacts::-webkit-scrollbar-thumb{background:#2a3530;border-radius:4px}
+  .contact{padding:14px;border-radius:12px;cursor:pointer;transition:all .15s;margin-bottom:2px;position:relative}
+  .contact:hover{background:#161c18}
+  .contact.active{background:#1a221d;border:1px solid #2a3530}
+  .contact .row{display:flex;justify-content:space-between;align-items:center}
   .contact .name{font-weight:700;font-size:14px;color:#fff}
-  .contact .preview{font-size:12px;color:#888;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .contact .meta{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#555}
-  .chat{display:flex;flex-direction:column;height:100%}
-  .chat-header{padding:16px 24px;border-bottom:1px solid #2a3530;background:#171e19}
-  .chat-header .name{font-weight:800;font-size:16px;color:#fff}
-  .chat-header .phone{font-size:13px;color:#888}
-  .messages{flex:1;overflow-y:auto;padding:24px}
-  .msg{max-width:70%;margin-bottom:12px;padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.5}
-  .msg.in{background:#1e2822;border:1px solid #2a3530;margin-right:auto}
-  .msg.out{background:#FF7614;color:#000;margin-left:auto;font-weight:500}
-  .msg .time{font-size:10px;color:#666;margin-top:4px}
-  .msg.out .time{color:rgba(0,0,0,0.5)}
-  .empty{display:flex;align-items:center;justify-content:center;height:100%;color:#555;font-size:16px}
-  .esc-badge{background:#ff4444;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
-  .tab-bar{display:flex;border-bottom:1px solid #2a3530}
-  .tab{padding:12px 20px;font-size:13px;font-weight:600;color:#888;cursor:pointer;border-bottom:2px solid transparent}
-  .tab.active{color:#FF7614;border-bottom-color:#FF7614}
-  @media(max-width:768px){.main{grid-template-columns:1fr}.sidebar{display:none}}
+  .contact .time{font-size:11px;color:#555}
+  .contact .preview{font-size:13px;color:#777;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+  .contact .badge{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .contact .pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:#1e2620;color:#888}
+  .contact .pill.esc{background:rgba(255,68,68,.15);color:#ff6666}
+  .contact .unread{position:absolute;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:#FF7614}
+
+  /* CHAT AREA */
+  .chat{display:flex;flex-direction:column;background:#0a0d0b;overflow:hidden}
+  .chat-header{padding:20px 28px;border-bottom:1px solid #1e2620;background:#111613;display:flex;align-items:center;gap:16px}
+  .avatar{width:44px;height:44px;border-radius:12px;background:#FF7614;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#000;flex-shrink:0}
+  .chat-info .name{font-weight:800;font-size:16px;color:#fff}
+  .chat-info .phone{font-size:13px;color:#666;margin-top:2px}
+  .messages{flex:1;overflow-y:auto;padding:28px;display:flex;flex-direction:column;gap:8px}
+  .messages::-webkit-scrollbar{width:4px}
+  .messages::-webkit-scrollbar-thumb{background:#2a3530;border-radius:4px}
+  .msg{max-width:65%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.6;word-wrap:break-word;position:relative}
+  .msg.in{background:#161c18;border:1px solid #1e2620;align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.out{background:#FF7614;color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
+  .msg .ts{font-size:10px;margin-top:6px;opacity:.5}
+  .date-sep{text-align:center;padding:16px 0;font-size:11px;color:#444;font-weight:600}
+  .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#333;gap:12px}
+  .empty .icon{font-size:48px;opacity:.3}
+  .empty .text{font-size:15px}
+
+  /* MOBILE */
+  @media(max-width:768px){
+    .app{grid-template-columns:1fr}
+    .sidebar.hidden{display:none}
+    .chat.hidden{display:none}
+  }
 </style>
 </head><body>
-<div class="header">
-  <h1>WhatsApp Agent</h1>
-  <div class="stats" id="stats"></div>
-</div>
-<div class="main">
+<div class="app">
+  <div class="header">
+    <h1>WhatsApp Agent</h1>
+    <div class="dot"></div>
+    <div class="stats" id="stats"></div>
+  </div>
   <div class="sidebar">
     <div class="tab-bar">
-      <div class="tab active" onclick="loadConversations()">Conversations</div>
-      <div class="tab" onclick="loadEscalations()">Escalations</div>
+      <div class="tab active" id="tab-convos" onclick="switchTab('convos')">Conversations</div>
+      <div class="tab" id="tab-esc" onclick="switchTab('esc')">Escalations</div>
     </div>
-    <div id="sidebar-content"></div>
+    <div class="contacts" id="sidebar-content"></div>
   </div>
   <div class="chat" id="chat">
-    <div class="empty">Select a conversation</div>
+    <div class="empty"><div class="icon">💬</div><div class="text">Select a conversation</div></div>
   </div>
 </div>
 <script>
-const API = '';
-async function api(path){const r=await fetch(API+path);return r.json()}
+let activeTab='convos', activeChat=null, pollTimer=null;
+async function api(p){const r=await fetch(p);return r.json()}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function relTime(iso){
+  if(!iso)return '';
+  const d=new Date(iso),now=new Date(),diff=now-d,m=Math.floor(diff/60000);
+  if(m<1)return 'now';if(m<60)return m+'m';
+  const h=Math.floor(m/60);if(h<24)return h+'h';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
 async function loadStats(){
   const s=await api('/api/stats');
-  document.getElementById('stats').innerHTML=
-    '<div class="stat"><div class="n">'+s.active_today+'</div><div class="l">Active Today</div></div>'+
-    '<div class="stat"><div class="n">'+s.messages_today+'</div><div class="l">Messages</div></div>'+
-    '<div class="stat"><div class="n">'+s.open_escalations+'</div><div class="l">Escalations</div></div>'+
-    '<div class="stat"><div class="n">'+s.total_contacts+'</div><div class="l">Contacts</div></div>';
+  document.getElementById('stats').innerHTML=[
+    {n:s.active_today,l:'Active'},
+    {n:s.messages_today,l:'Messages'},
+    {n:s.open_escalations,l:'Escalations'},
+    {n:s.total_contacts,l:'Contacts'}
+  ].map(x=>'<div class="stat"><div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></div>').join('');
+}
+function switchTab(tab){
+  activeTab=tab;
+  document.getElementById('tab-convos').classList.toggle('active',tab==='convos');
+  document.getElementById('tab-esc').classList.toggle('active',tab==='esc');
+  if(tab==='convos')loadConversations();else loadEscalations();
 }
 async function loadConversations(){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab')[0].classList.add('active');
   const convos=await api('/api/conversations');
-  document.getElementById('sidebar-content').innerHTML=convos.map(c=>
-    '<div class="contact" onclick="loadChat('+c.id+')">'+
-    '<div class="name">'+(c.name||c.phone)+'</div>'+
-    '<div class="preview">'+(c.last_message||'')+'</div>'+
-    '<div class="meta"><span>'+c.platform+'</span><span>'+c.message_count+' msgs</span></div>'+
-    '</div>'
-  ).join('');
+  const el=document.getElementById('sidebar-content');
+  if(!convos.length){el.innerHTML='<div style="padding:32px;text-align:center;color:#444">No conversations yet</div>';return}
+  el.innerHTML=convos.map(c=>{
+    const init=(c.name||c.phone||'?')[0].toUpperCase();
+    return '<div class="contact'+(activeChat===c.id?' active':'')+'" onclick="loadChat('+c.id+')">'+
+      '<div class="row"><div class="name">'+esc(c.name||c.phone)+'</div><div class="time">'+relTime(c.last_seen)+'</div></div>'+
+      '<div class="preview">'+esc(c.last_message||'')+'</div>'+
+      '<div class="badge"><span class="pill">'+c.platform+'</span><span class="pill">'+c.message_count+' msgs</span></div>'+
+    '</div>'}).join('');
 }
 async function loadEscalations(){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab')[1].classList.add('active');
   const escs=await api('/api/escalations');
-  document.getElementById('sidebar-content').innerHTML=escs.map(e=>
+  const el=document.getElementById('sidebar-content');
+  if(!escs.length){el.innerHTML='<div style="padding:32px;text-align:center;color:#444">No open escalations</div>';return}
+  el.innerHTML=escs.map(e=>
     '<div class="contact" onclick="loadChat('+e.contact_id+')">'+
-    '<div class="name">'+(e.name||e.phone)+' <span class="esc-badge">OPEN</span></div>'+
-    '<div class="preview">'+e.reason+'</div>'+
-    '<div class="meta"><span>'+e.created_at.substring(0,10)+'</span><span>'+e.context?.substring(0,30)+'</span></div>'+
-    '</div>'
-  ).join('')||'<div style="padding:24px;color:#555">No open escalations</div>';
+      '<div class="row"><div class="name">'+esc(e.name||e.phone)+'</div><div class="time">'+relTime(e.created_at)+'</div></div>'+
+      '<div class="preview">'+esc(e.reason)+'</div>'+
+      '<div class="badge"><span class="pill esc">ESCALATED</span><span class="pill">'+esc(e.context?.substring(0,40)||'')+'</span></div>'+
+    '</div>').join('');
 }
 async function loadChat(id){
+  activeChat=id;
   const data=await api('/api/conversations/'+id);
-  const c=data.contact;
-  const msgs=data.messages;
+  const c=data.contact, msgs=data.messages;
+  const init=(c.name||c.phone||'?')[0].toUpperCase();
+  let lastDate='';
+  const msgHTML=msgs.map(m=>{
+    const d=m.created_at.substring(0,10);
+    let sep='';
+    if(d!==lastDate){lastDate=d;sep='<div class="date-sep">'+new Date(d).toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})+'</div>'}
+    return sep+'<div class="msg '+(m.direction==='in'?'in':'out')+'">'+esc(m.text)+'<div class="ts">'+m.created_at.substring(11,16)+'</div></div>';
+  }).join('');
   document.getElementById('chat').innerHTML=
-    '<div class="chat-header"><div class="name">'+(c.name||c.phone)+'</div><div class="phone">'+c.phone+' &middot; '+c.platform+' &middot; '+c.message_count+' messages</div></div>'+
-    '<div class="messages" id="msgs">'+msgs.map(m=>
-      '<div class="msg '+(m.direction==='in'?'in':'out')+'">'+m.text+'<div class="time">'+m.created_at.substring(11,19)+'</div></div>'
-    ).join('')+'</div>';
-  document.getElementById('msgs').scrollTop=99999;
+    '<div class="chat-header"><div class="avatar">'+init+'</div><div class="chat-info"><div class="name">'+esc(c.name||c.phone)+'</div><div class="phone">'+esc(c.phone)+' &middot; '+c.message_count+' messages &middot; First seen '+relTime(c.first_seen)+'</div></div></div>'+
+    '<div class="messages" id="msgs">'+msgHTML+'</div>';
+  const el=document.getElementById('msgs');el.scrollTop=el.scrollHeight;
+  if(activeTab==='convos')loadConversations();
+  startPoll(id);
+}
+function startPoll(id){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(()=>{if(activeChat===id)loadChat(id)},10000);
 }
 loadStats();loadConversations();
-setInterval(loadStats,30000);
+setInterval(loadStats,15000);
 </script>
 </body></html>`;
 }
